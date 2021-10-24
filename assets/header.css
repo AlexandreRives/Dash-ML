@@ -1,0 +1,43 @@
+.app-header--refresh {
+	color: rgb(0, 0, 0) !important;
+	text-transform: uppercase;
+	text-decoration: none;
+	background: #ffffff;
+	padding: 20px;
+	border-radius: 5px;
+	display: inline-block;
+	margin-left: 200px;
+	margin-right: 200px;
+	border: none;
+	transition: all 0.4s ease 0s;
+}
+
+.app-header--refresh:hover {
+	background: #fd0101;
+	color: rgb(238, 255, 0) !important;
+	letter-spacing: 1px;
+	-webkit-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+	-moz-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+	box-shadow: 5px 40px -10px rgba(0,0,0,0.57);
+	transition: all 0.4s ease 0s;
+}
+
+.buttonClick {
+	color: rgb(0, 0, 0) !important;
+	text-decoration: none;
+	background: #ffffff;
+	padding: 10px;
+	border-radius: 5px;
+	display: inline-block;
+	transition: all 0.4s ease 0s;
+}
+
+.buttonClick:hover {
+	background: #0004ff;
+	color: rgb(255, 255, 255) !important;
+	letter-spacing: 1px;
+	-webkit-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+	-moz-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+	box-shadow: 5px 40px -10px rgba(0,0,0,0.57);
+	transition: all 0.4s ease 0s;
+}
