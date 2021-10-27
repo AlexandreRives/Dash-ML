@@ -10,22 +10,21 @@ from dash import dash_table
 import warnings
 warnings.filterwarnings("ignore")
 from kmeans import KMeans_algo
+import kmeans_layout
+import arbre_layout
+import cah_layout
+import adl_layout
+import reglog_layout
+import regmul_layout
 
 # CSS
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 # Lancement de dash
-app = dash.Dash(__name__, external_stylesheets=[external_stylesheets, dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__, external_stylesheets=[external_stylesheets, dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 
-# Layout
-app.layout = html.Div([
-    html.Div(children=[html.H2('Bienvenue sur notre application', style={'textAlign': 'center', 'margin-top': '20px'}),
-    html.H5("Elisa, Jackie, Alexandre", style={'textAlign': 'center'}),
-    html.Br()
-    ]),
-    
-    # Cadre pour le chargement du fichier
-    dcc.Upload(
+# Cadre pour le chargement du fichier
+app_layout = html.Div(children=[dcc.Upload(
         id='upload-data',
         children=html.Div([
             'Faites glisser votre fichier ici ou ',
@@ -47,9 +46,11 @@ app.layout = html.Div([
         # Seulement un fichier peut être sélectionné.
         multiple=True
     ),
-    
-    html.A('Appuyer ici avant de charger un nouveau dataset', href='/', style={'textAlign': 'center', 'display': 'block', 'margin-top':'30px'}, className="app-header--refresh"),   
 
+    html.Div(children=[html.A('Appuyer ici avant de charger un nouveau dataset', href='/', style={'textAlign': 'center', 'display': 'block', 'margin-top':'30px'}, className="app-header--refresh"),
+    
+    html.Br(),
+    ]),
     # Affichage du tableau
     html.Div(id='output-data-upload'),
     html.Hr(),
@@ -63,17 +64,21 @@ app.layout = html.Div([
         dcc.Tab(label='Régression Logisitque', value='reglog'),
         dcc.Tab(label='Régression Linéaire Multiple', value='regmul'),
     ]),
+
     html.Div(id='contenu_algo'),
 
     html.Hr(),
+    
+])
 
-    html.Div(id='analyse_kmeans'),
-    html.Div(id='analyse_arbre'),
-    html.Div(id='analyse_cah'),
-    html.Div(id='analyse_adl'),
-    html.Div(id='analyse_reglog'),
-    html.Div(id='analyse_regmul'),
-
+# Layout
+app.layout = html.Div([
+    html.Div(children=[html.H2('Bienvenue sur notre application', style={'textAlign': 'center', 'margin-top': '20px'}),
+    html.H5("Elisa, Jacky, Alexandre", style={'textAlign': 'center'}),
+    html.Br(),
+    html.Div(app_layout)
+    ]),
+    
 ])
 
 # Fonction qui permet le chargement et l'affichage du dataset + des options de sélection de variables.
@@ -106,16 +111,16 @@ def parse_contents(contents, filename, date):
 
         html.Hr(),
 
-        html.H6(children="Choisir votre variable cible : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
+        html.Div(children=[html.H6(children="Choisir votre variable cible : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
         dcc.Dropdown(
             id='varY',
             options=[
                 {'label': i, 'value': i} for i in df.columns
             ],
-            style={'width': '300px', 'margin-left': '10px'}
+            style={'width': '300px', 'margin-left': '10px'},
         ),
-        html.Hr(),
-        html.H6(children="Choisir vos variables explicatives : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
+        html.Br(),
+        html.H6(children="Choisir vos variables explicatives : ", style={'text-decoration': 'underline', 'margin-left':'10px'}),
         dcc.Dropdown(
             id='varX',
             options=[
@@ -123,8 +128,8 @@ def parse_contents(contents, filename, date):
             ],
             multi=True,
             style={'width': '300px', 'margin-left': '10px'}
-        ),
-        html.Hr(),
+        )]),
+        html.Br()
     ])
 
 # Mis à jour du tableau en fonction du fichier qui est importé
@@ -146,132 +151,91 @@ def render_algo(onglets):
 
     # KMeans
     if onglets == 'KMeans':
-        return html.Div(children=[
-            html.P('Choisir le nombre de clusters :'),
-            dcc.Input(id='nb_cluster', value=1, type='number', min=1, max=10, step=1),
-            html.Br(),
-            html.Br(),
-            html.Div(html.Button("Lancer l'algorithme", id='submit-kmeans', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'})
-        ], style={'margin-left': '10px', 'margin-top': '30px'})
+        return kmeans_layout.kmeans_layout
 
     # Arbre de décision
     elif onglets == 'arbre':
-        return html.Div(children=[
-            html.P('Choisir le nombre de feuilles :'),
-            dcc.Input(id='nb_feuilles', value=1, type='number', min=1, max=10, step=1),
-            html.Br(),
-            html.Br(),
-            html.Div(html.Button("Lancer l'algorithme", id='submit-arbre', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'})
-        ], style={'margin-left': '10px', 'margin-top': '30px'})
+        return arbre_layout.arbre_layout
 
     # Classification ascendante hiérarchique
     elif onglets == 'cah':
-        return html.Div(children=[
-            html.Br(),
-            html.Br(),
-            html.Div(html.Button("Lancer l'algorithme", id='submit-cah', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'})
-        ], style={'margin-left': '10px', 'margin-top': '30px'})
+        return cah_layout.cah_layout
 
     # Analyse disciminante linéaire
     elif onglets == 'adl':
         # Mise en forme : séparer en plusieurs children. Voir : https://dash.plotly.com/layout
-        return html.Div(children=[
-            html.P("Taille de l'échantillon test :"),
-            dcc.Input(id='t_ech_test', value=0.3, type='number', min=0, max=1, step=0.1),
-            html.Br(),
-            html.P("Solveur :"),
-            dcc.Dropdown(id='solv', options=[{'label' : 'svd', 'value' : 'svd'}, {'label' : 'logr', 'value' : 'logr'}, {'label' : 'eigen', 'value' : 'eigen'}], value='svd', style={'width': '300px'}),
-            html.Br(),
-            html.Br(),
-            html.P('Nombre de splits :'),
-            dcc.Input(id='nb_splits', value=10, type='number', min=1, max=20, step=1),
-            html.Br(),
-            html.Br(),
-            html.P('Nombre de répétitions :'),
-            dcc.Input(id='nb_repeats', value=50, type='number', min=1, max=100, step=10),
-            html.Br(),
-            html.Br(),
-            html.Div(html.Button("Lancer l'algorithme", id='submit-adl', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'})
-        ], style={'margin-left': '10px', 'margin-top': '30px'})
+        return adl_layout.adl_layout
 
     # Régression logistique
     elif onglets == 'reglog':
-        return html.Div(children=[
-            html.Br(),
-            html.Br(),
-            html.Div(html.Button("Lancer l'algorithme", id='submit-reglog', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'})
-        ], style={'margin-left': '10px', 'margin-top': '30px'})
+        return reglog_layout.reglog_layout
 
     # Régression linéraire multiple
     elif onglets == 'regmul':
-        return html.Div(children=[
-            html.Br(),
-            html.Br(),
-            html.Div(html.Button("Lancer l'algorithme", id='submit-regmul', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'})
-        ], style={'margin-left': '10px', 'margin-top': '30px'})
+        return regmul_layout.regmul_layout
 
-# Bouton submit analyse KMeans
+# Bouton submit analyse avec K-Means
 @app.callback(Output('analyse_kmeans', 'children'),
-                Input('varY', 'value'),
-                Input('varX', 'value'),
-                Input('df', 'data'),
-                Input('nb_cluster', 'value'),
+                State('varY', 'value'),
+                State('varX', 'value'),
+                State('df', 'data'),
+                State('nb_cluster', 'value'),
                 Input('submit-kmeans', 'n_clicks'))
 def affichage_algo_kmeans(varY, varX, df, clusters, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
-        # Retraiter les données pour les envoyer dans l'algo.
         algoKmeans = KMeans_algo(df, varX, varY, clusters)
         algoKmeans.Algo_KMeans(df, varX, varY, clusters)
-        return html.Div(children=[html.H5("Présentation de l'algorithme des KMeans", style={'textAlign': 'center'})]),
+
+        return html.Br(), html.Div(children=[html.H5("Présentation de l'algorithme des kmeans", style={'textAlign': 'center'})]),
 
 # Bouton submit analyse avec Arbre des décisions
 @app.callback(Output('analyse_arbre', 'children'),
-                Input('varY', 'value'),
-                Input('varX', 'value'),
-                Input('df', 'data'),
-                Input('nb_feuilles', 'value'),
+                State('varY', 'value'),
+                State('varX', 'value'),
+                State('df', 'data'),
+                State('nb_feuilles', 'value'),
                 Input('submit-arbre', 'n_clicks'))
 def affichage_algo_arbre(varY, varX, df, clusters, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
 
-        return html.Div(children=[html.H5("Présentation de l'algorithme de l'arbre des décisions", style={'textAlign': 'center'})]),
+        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de l'arbre des décisions", style={'textAlign': 'center'})]),
 
 # Bouton submit avec CAH
 @app.callback(Output('analyse_cah', 'children'),
-                Input('varY', 'value'),
-                Input('varX', 'value'),
-                Input('df', 'data'),
+                State('varY', 'value'),
+                State('varX', 'value'),
+                State('df', 'data'),
                 Input('submit-cah', 'n_clicks'))
 def affichage_algo_cah(varY, varX, df, clusters, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
 
-        return html.Div(children=[html.H5("Présentation de l'algorithme de la classification ascendante hiérarchique", style={'textAlign': 'center'})]),
+        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la classification ascendante hiérarchique", style={'textAlign': 'center'})]),
 
 # Bouton submit avec ADL
 @app.callback(Output('analyse_adl', 'children'),
-                Input('varY', 'value'),
-                Input('varX', 'value'),
-                Input('df', 'data'),
-                Input('nb_splits', 'value'),
-                Input('t_ech_test', 'value'),
-                Input('solv', 'value'),
-                Input('nb_repeats', 'value'),
+                State('varY', 'value'),
+                State('varX', 'value'),
+                State('df', 'data'),
+                State('nb_splits', 'value'),
+                State('t_ech_test', 'value'),
+                State('solv', 'value'),
+                State('nb_repeats', 'value'),
                 Input('submit-adl', 'n_clicks'))
 def affichage_algo_adl(varY, varX, df, nb_splits, t_ech_test, solv, nb_repeats, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
         # Retraiter les données pour les envoyer dans l'algo.
 
-        return html.Div(children=[html.H5("Présentation de l'algorithme de l'analyse discriminante linéaire", style={'textAlign': 'center'})]),
+        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de l'analyse discriminante linéaire", style={'textAlign': 'center'})]),
 
 # Bouton submit avec Reg Log
 @app.callback(Output('analyse_reglog', 'children'),
-                Input('varY', 'value'),
-                Input('varX', 'value'),
-                Input('df', 'data'),
+                State('varY', 'value'),
+                State('varX', 'value'),
+                State('df', 'data'),
                 Input('submit-reglog', 'n_clicks'))
 def affichage_algo_reglog(varY, varX, df, clusters, n_clicks):
     if(n_clicks != 0):
@@ -279,13 +243,13 @@ def affichage_algo_reglog(varY, varX, df, clusters, n_clicks):
         # Retraiter les données pour les envoyer dans l'algo.
         # algoKmeans = KMeans_algo(df, varX, varY, clusters)
         # algoKmeans.Algo_KMeans(df, varX, varY, clusters)
-        return html.Div(children=[html.H5("Présentation de l'algorithme de la régression logistique", style={'textAlign': 'center'})]),
+        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la régression logistique", style={'textAlign': 'center'})]),
 
 # Bouton submit avec Reg Mul
 @app.callback(Output('analyse_regmul', 'children'),
-                Input('varY', 'value'),
-                Input('varX', 'value'),
-                Input('df', 'data'),
+                State('varY', 'value'),
+                State('varX', 'value'),
+                State('df', 'data'),
                 Input('submit-regmul', 'n_clicks'))
 def affichage_algo_regmul(varY, varX, df, clusters, n_clicks):
     if(n_clicks != 0):
@@ -293,9 +257,7 @@ def affichage_algo_regmul(varY, varX, df, clusters, n_clicks):
         # Retraiter les données pour les envoyer dans l'algo.
         # algoKmeans = KMeans_algo(df, varX, varY, clusters)
         # algoKmeans.Algo_KMeans(df, varX, varY, clusters)
-        return html.Div(children=[html.H5("Présentation de l'algorithme de la regression linéaire multiple", style={'textAlign': 'center'})]),
-
-
+        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la regression linéaire multiple", style={'textAlign': 'center'})]),
 
 # Lancement du serveur
 if __name__ == '__main__':
