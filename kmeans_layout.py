@@ -11,3 +11,4 @@ kmeans_layout = html.Div(children=[
             html.Div(id='analyse_kmeans'),
         ], style={'margin-left': '10px', 'margin-top': '30px'})
 
+

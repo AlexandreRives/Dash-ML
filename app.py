@@ -7,9 +7,8 @@ from dash.dependencies import Input, Output, State
 from dash import dcc
 from dash import html
 from dash import dash_table
-import warnings
-warnings.filterwarnings("ignore")
-from kmeans import KMeans_algo
+from clustering import Clustering
+from regression import Regression
 import kmeans_layout
 import arbre_layout
 import cah_layout
@@ -27,7 +26,7 @@ app = dash.Dash(__name__, external_stylesheets=[external_stylesheets, dbc.themes
 app_layout = html.Div(children=[dcc.Upload(
         id='upload-data',
         children=html.Div([
-            'Faites glisser votre fichier ici ou ',
+            '1. Faites glisser votre fichier ici ou ',
             html.A('cliquer pour choisir votre fichier')
         ]),
         style={
@@ -41,7 +40,10 @@ app_layout = html.Div(children=[dcc.Upload(
             'margin-top': '10px',
             'margin-bottom' : '10px',
             'margin-left': '200px',
-            'margin-right': '200px'
+            'margin-right': '200px',
+            'textAlign': 'center',
+            'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414',
+            'color':'#333'
         },
         # Seulement un fichier peut être sélectionné.
         multiple=True
@@ -57,12 +59,12 @@ app_layout = html.Div(children=[dcc.Upload(
 
     # Onglets de sélection des algorithmes
     dcc.Tabs(id="algos", children=[
-        dcc.Tab(label='KMeans', value='KMeans'),
-        dcc.Tab(label='Arbre de décision', value='arbre'),
-        dcc.Tab(label='CAH', value='cah'),
-        dcc.Tab(label='Analyse Discriminante Linéaire', value='adl'),
-        dcc.Tab(label='Régression Logisitque', value='reglog'),
-        dcc.Tab(label='Régression Linéaire Multiple', value='regmul'),
+        dcc.Tab(label='KMeans', value='KMeans', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
+        dcc.Tab(label='Arbre de décision', value='arbre', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
+        dcc.Tab(label='CAH', value='cah', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
+        dcc.Tab(label='Analyse Discriminante Linéaire', value='adl', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
+        dcc.Tab(label='Régression Logisitque', value='reglog', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
+        dcc.Tab(label='Régression Linéaire Multiple', value='regmul', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
     ]),
 
     html.Div(id='contenu_algo'),
@@ -73,8 +75,9 @@ app_layout = html.Div(children=[dcc.Upload(
 
 # Layout
 app.layout = html.Div([
-    html.Div(children=[html.H2('Bienvenue sur notre application', style={'textAlign': 'center', 'margin-top': '20px'}),
-    html.H5("Elisa, Jacky, Alexandre", style={'textAlign': 'center'}),
+    html.Br(),
+    html.Div(children=[html.H2('Bienvenue sur notre application', style={'textAlign': 'center', 'margin-top': '20px', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+    html.H3("Elisa, Jacky, Alexandre", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
     html.Br(),
     html.Div(app_layout)
     ]),
@@ -100,17 +103,19 @@ def parse_contents(contents, filename, date):
         ])
 
     return html.Div(children=[
-        html.P("Nom du fichier : " + filename, style={'margin-left': '10px'}),
-
         html.Div(dash_table.DataTable(
             id='df',
             data=df.to_dict('records'),
             columns=[{'name': i, 'id': i} for i in df.columns],
-            page_size=5
+            page_size=5,
+            style_cell={'textAlign':'center'},
+            style_header={'fontWeight':'bold'}
         ), style={'margin':'20px'}),
 
         html.Hr(),
-
+        html.Br(),
+        html.P("2. Choix des variables", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+        
         html.Div(children=[html.H6(children="Choisir votre variable cible : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
         dcc.Dropdown(
             id='varY',
@@ -129,7 +134,13 @@ def parse_contents(contents, filename, date):
             multi=True,
             style={'width': '300px', 'margin-left': '10px'}
         )]),
-        html.Br()
+        html.Br(),
+
+        html.Div(html.P('***** Les onglets de couleurs rouges correspondent aux algorithmes de types classification tandis que les bleus correspondent aux régressions *****'), style={'textAlign':'center', 'fontWeight':'bold'}),
+
+        html.Br(),
+
+        html.P("3. Choix de l'algorithme", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
     ])
 
 # Mis à jour du tableau en fonction du fichier qui est importé
@@ -184,10 +195,8 @@ def render_algo(onglets):
 def affichage_algo_kmeans(varY, varX, df, clusters, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
-        algoKmeans = KMeans_algo(df, varX, varY, clusters)
-        algoKmeans.Algo_KMeans(df, varX, varY, clusters)
-
-        return html.Br(), html.Div(children=[html.H5("Présentation de l'algorithme des kmeans", style={'textAlign': 'center'})]),
+        algoKmeans = Clustering(df, varX, varY, clusters)
+        return algoKmeans.algo_kmeans(df, varX, varY, clusters)
 
 # Bouton submit analyse avec Arbre des décisions
 @app.callback(Output('analyse_arbre', 'children'),
@@ -227,8 +236,7 @@ def affichage_algo_cah(varY, varX, df, clusters, n_clicks):
 def affichage_algo_adl(varY, varX, df, nb_splits, t_ech_test, solv, nb_repeats, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
-        # Retraiter les données pour les envoyer dans l'algo.
-
+        
         return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de l'analyse discriminante linéaire", style={'textAlign': 'center'})]),
 
 # Bouton submit avec Reg Log
@@ -240,9 +248,7 @@ def affichage_algo_adl(varY, varX, df, nb_splits, t_ech_test, solv, nb_repeats, 
 def affichage_algo_reglog(varY, varX, df, clusters, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
-        # Retraiter les données pour les envoyer dans l'algo.
-        # algoKmeans = KMeans_algo(df, varX, varY, clusters)
-        # algoKmeans.Algo_KMeans(df, varX, varY, clusters)
+        
         return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la régression logistique", style={'textAlign': 'center'})]),
 
 # Bouton submit avec Reg Mul
@@ -251,13 +257,11 @@ def affichage_algo_reglog(varY, varX, df, clusters, n_clicks):
                 State('varX', 'value'),
                 State('df', 'data'),
                 Input('submit-regmul', 'n_clicks'))
-def affichage_algo_regmul(varY, varX, df, clusters, n_clicks):
+def affichage_algo_regmul(varY, varX, df, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
-        # Retraiter les données pour les envoyer dans l'algo.
-        # algoKmeans = KMeans_algo(df, varX, varY, clusters)
-        # algoKmeans.Algo_KMeans(df, varX, varY, clusters)
-        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la regression linéaire multiple", style={'textAlign': 'center'})]),
+        algo_reg_mul = Regression(df, varX, varY)
+        return algo_reg_mul.regression_lineaire_multiple(df, varX, varY)
 
 # Lancement du serveur
 if __name__ == '__main__':
