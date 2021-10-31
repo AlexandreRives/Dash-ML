@@ -3,32 +3,32 @@ import io
 import dash
 import pandas as pd
 import dash_bootstrap_components as dbc
+import classification_layout
+import regression_layout
+
 from dash.dependencies import Input, Output, State
 from dash import dcc
 from dash import html
 from dash import dash_table
-from clustering import Clustering
+from classification import Classification
 from regression import Regression
-import kmeans_layout
-import arbre_layout
-import cah_layout
-import adl_layout
-import reglog_layout
-import regmul_layout
 
 # CSS
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-# Lancement de dash
+# Instanciation de Dash
 app = dash.Dash(__name__, external_stylesheets=[external_stylesheets, dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 
 # Cadre pour le chargement du fichier
-app_layout = html.Div(children=[dcc.Upload(
+app_layout = html.Div(children=
+    [
+        dcc.Upload(
         id='upload-data',
-        children=html.Div([
-            '1. Faites glisser votre fichier ici ou ',
-            html.A('cliquer pour choisir votre fichier')
-        ]),
+        children=html.Div(
+            [
+                '1. Faites glisser votre fichier ici ou ',
+                html.A('cliquer pour choisir votre fichier')
+            ]),
         style={
             'width': 'auto',
             'height': '60px',
@@ -49,40 +49,45 @@ app_layout = html.Div(children=[dcc.Upload(
         multiple=True
     ),
 
-    html.Div(children=[html.A('Appuyer ici avant de charger un nouveau dataset', href='/', style={'textAlign': 'center', 'display': 'block', 'margin-top':'30px'}, className="app-header--refresh"),
-    
-    html.Br(),
-    ]),
+    html.Div(children=
+        [
+            html.A('Appuyer ici avant de charger un nouveau dataset', href='/', style={'textAlign': 'center', 'display': 'block', 'margin-top':'30px'}, className="app-header--refresh"),
+            html.Br(),
+        ]
+    ),
+
     # Affichage du tableau
     html.Div(id='output-data-upload'),
     html.Hr(),
 
     # Onglets de sélection des algorithmes
-    dcc.Tabs(id="algos", children=[
-        dcc.Tab(label='KMeans', value='KMeans', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
-        dcc.Tab(label='Arbre de décision', value='arbre', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
-        dcc.Tab(label='CAH', value='cah', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
-        dcc.Tab(label='Analyse Discriminante Linéaire', value='adl', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
-        dcc.Tab(label='Régression Logisitque', value='reglog', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
-        dcc.Tab(label='Régression Linéaire Multiple', value='regmul', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
-    ]),
+    dcc.Tabs(id="algos", children=
+        [
+            dcc.Tab(label='Support Vecteur Machine', value='svm', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
+            dcc.Tab(label='Analyse Discriminante Linéaire', value='adl', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
+            dcc.Tab(label='Régression Logisitque', value='reglog', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
+            dcc.Tab(label='K Plus Proches Voisins', value='knn', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
+            dcc.Tab(label='Arbre de Décision', value='arbre', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
+            dcc.Tab(label='Régression Linéaire Multiple', value='regmul', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
+        ]
+    ),
 
     html.Div(id='contenu_algo'),
-
     html.Hr(),
     
-])
+    ]
+)
 
 # Layout
-app.layout = html.Div([
-    html.Br(),
-    html.Div(children=[html.H2('Bienvenue sur notre application', style={'textAlign': 'center', 'margin-top': '20px', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-    html.H3("Elisa, Jacky, Alexandre", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-    html.Br(),
-    html.Div(app_layout)
-    ]),
-    
-])
+app.layout = html.Div(children=
+    [
+        html.Br(),
+        html.H2('Bienvenue sur notre application', style={'textAlign': 'center', 'margin-top': '20px', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+        html.H3("Elisa, Jacky, Alexandre", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+        html.Br(),
+        html.Div(app_layout)
+    ]
+)
 
 # Fonction qui permet le chargement et l'affichage du dataset + des options de sélection de variables.
 def parse_contents(contents, filename, date):
@@ -102,46 +107,55 @@ def parse_contents(contents, filename, date):
             'Erreur lors du chargement de votre fichier.'
         ])
 
-    return html.Div(children=[
-        html.Div(dash_table.DataTable(
-            id='df',
-            data=df.to_dict('records'),
-            columns=[{'name': i, 'id': i} for i in df.columns],
-            page_size=5,
-            style_cell={'textAlign':'center'},
-            style_header={'fontWeight':'bold'}
-        ), style={'margin':'20px'}),
+    return html.Div(children=
+        [
+            html.Div(dash_table.DataTable(
+                id='df',
+                data=df.to_dict('records'),
+                columns=[{'name': i, 'id': i} for i in df.columns],
+                page_size=5,
+                style_cell={'textAlign':'center'},
+                style_header={'fontWeight':'bold'}
+            ),
+            style={'margin':'20px'}),
 
-        html.Hr(),
-        html.Br(),
-        html.P("2. Choix des variables", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-        
-        html.Div(children=[html.H6(children="Choisir votre variable cible : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
-        dcc.Dropdown(
-            id='varY',
-            options=[
-                {'label': i, 'value': i} for i in df.columns
-            ],
-            style={'width': '300px', 'margin-left': '10px'},
-        ),
-        html.Br(),
-        html.H6(children="Choisir vos variables explicatives : ", style={'text-decoration': 'underline', 'margin-left':'10px'}),
-        dcc.Dropdown(
-            id='varX',
-            options=[
-                {'label': i, 'value': i} for i in df.columns
-            ],
-            multi=True,
-            style={'width': '300px', 'margin-left': '10px'}
-        )]),
-        html.Br(),
+            html.Hr(),
+            html.Br(),
+            html.P("2. Choix des variables", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+            
+            html.Div(children=
+                [
+                    html.H6(children="Choisir votre variable cible : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
+                    dcc.Dropdown(
+                        id='varY',
+                        options=
+                        [
+                            {'label': i, 'value': i} for i in df.columns
+                        ],
+                        style={'width': '300px', 'margin-left': '10px'},
+                    ),
+                    html.Br(),
+                    html.H6(children="Choisir vos variables explicatives : ", style={'text-decoration': 'underline', 'margin-left':'10px'}),
+                    dcc.Dropdown(
+                        id='varX',
+                        options=
+                        [
+                            {'label': i, 'value': i} for i in df.columns
+                        ],
+                        multi=True,
+                        style={'width': '300px', 'margin-left': '10px'}
+                    )
+                ]
+            ),
+            html.Br(),
 
-        html.Div(html.P('***** Les onglets de couleurs rouges correspondent aux algorithmes de types classification tandis que les bleus correspondent aux régressions *****'), style={'textAlign':'center', 'fontWeight':'bold'}),
+            html.Div(html.P('***** Les onglets de couleurs rouges correspondent aux algorithmes de types classification tandis que les bleus correspondent aux régressions *****'), style={'textAlign':'center', 'fontWeight':'bold'}),
 
-        html.Br(),
+            html.Br(),
 
-        html.P("3. Choix de l'algorithme", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-    ])
+            html.P("3. Choix de l'algorithme", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+        ]
+    )
 
 # Mis à jour du tableau en fonction du fichier qui est importé
 @app.callback(Output('output-data-upload', 'children'),
@@ -150,7 +164,7 @@ def parse_contents(contents, filename, date):
                 State('upload-data', 'last_modified'))
 def update_output(list_of_contents, list_of_names, list_of_dates):
     if list_of_contents is not None:
-        children = [
+        children=[
             parse_contents(c, n, d) for c, n, d in
             zip(list_of_contents, list_of_names, list_of_dates)]
         return children
@@ -160,68 +174,42 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
                 Input('algos', 'value'))
 def render_algo(onglets):
 
-    # KMeans
-    if onglets == 'KMeans':
-        return kmeans_layout.kmeans_layout
+    # Support Vector Machine
+    if onglets == 'svm':
+        return classification_layout.SVM_layout
 
-    # Arbre de décision
-    elif onglets == 'arbre':
-        return arbre_layout.arbre_layout
-
-    # Classification ascendante hiérarchique
-    elif onglets == 'cah':
-        return cah_layout.cah_layout
+    # Régression logistique
+    elif onglets == 'reglog':
+        return classification_layout.reglog_layout
 
     # Analyse disciminante linéaire
     elif onglets == 'adl':
         # Mise en forme : séparer en plusieurs children. Voir : https://dash.plotly.com/layout
-        return adl_layout.adl_layout
+        return classification_layout.adl_layout
 
-    # Régression logistique
-    elif onglets == 'reglog':
-        return reglog_layout.reglog_layout
+    # K plus proches voisins
+    elif onglets == 'knn':
+        return regression_layout.knn_layout
+   
+        # Arbre de décision
+    elif onglets == 'arbre':
+        return regression_layout.arbre_layout
 
     # Régression linéraire multiple
     elif onglets == 'regmul':
-        return regmul_layout.regmul_layout
+        return regression_layout.regmul_layout
 
-# Bouton submit analyse avec K-Means
-@app.callback(Output('analyse_kmeans', 'children'),
+# Bouton submit analyse avec SVM
+@app.callback(Output('analyse_svm', 'children'),
                 State('varY', 'value'),
                 State('varX', 'value'),
                 State('df', 'data'),
-                State('nb_cluster', 'value'),
-                Input('submit-kmeans', 'n_clicks'))
-def affichage_algo_kmeans(varY, varX, df, clusters, n_clicks):
+                Input('submit-svm', 'n_clicks'))
+def affichage_algo_svm(varY, varX, df, clusters, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
-        algoKmeans = Clustering(df, varX, varY, clusters)
+        algoKmeans = Classification(df, varX, varY, clusters)
         return algoKmeans.algo_kmeans(df, varX, varY, clusters)
-
-# Bouton submit analyse avec Arbre des décisions
-@app.callback(Output('analyse_arbre', 'children'),
-                State('varY', 'value'),
-                State('varX', 'value'),
-                State('df', 'data'),
-                State('nb_feuilles', 'value'),
-                Input('submit-arbre', 'n_clicks'))
-def affichage_algo_arbre(varY, varX, df, clusters, n_clicks):
-    if(n_clicks != 0):
-        df = pd.DataFrame(df)
-
-        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de l'arbre des décisions", style={'textAlign': 'center'})]),
-
-# Bouton submit avec CAH
-@app.callback(Output('analyse_cah', 'children'),
-                State('varY', 'value'),
-                State('varX', 'value'),
-                State('df', 'data'),
-                Input('submit-cah', 'n_clicks'))
-def affichage_algo_cah(varY, varX, df, clusters, n_clicks):
-    if(n_clicks != 0):
-        df = pd.DataFrame(df)
-
-        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la classification ascendante hiérarchique", style={'textAlign': 'center'})]),
 
 # Bouton submit avec ADL
 @app.callback(Output('analyse_adl', 'children'),
@@ -236,7 +224,7 @@ def affichage_algo_cah(varY, varX, df, clusters, n_clicks):
 def affichage_algo_adl(varY, varX, df, nb_splits, t_ech_test, solv, nb_repeats, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
-        
+
         return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de l'analyse discriminante linéaire", style={'textAlign': 'center'})]),
 
 # Bouton submit avec Reg Log
@@ -250,6 +238,31 @@ def affichage_algo_reglog(varY, varX, df, clusters, n_clicks):
         df = pd.DataFrame(df)
         
         return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la régression logistique", style={'textAlign': 'center'})]),
+
+# Bouton submit avec KNN
+@app.callback(Output('analyse_knn', 'children'),
+                State('varY', 'value'),
+                State('varX', 'value'),
+                State('df', 'data'),
+                Input('submit-knn', 'n_clicks'))
+def affichage_algo_knn(varY, varX, df, clusters, n_clicks):
+    if(n_clicks != 0):
+        df = pd.DataFrame(df)
+
+        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la classification ascendante hiérarchique", style={'textAlign': 'center'})]),
+
+# Bouton submit analyse avec Arbre des décisions
+@app.callback(Output('analyse_arbre', 'children'),
+                State('varY', 'value'),
+                State('varX', 'value'),
+                State('df', 'data'),
+                State('nb_feuilles', 'value'),
+                Input('submit-arbre', 'n_clicks'))
+def affichage_algo_arbre(varY, varX, df, clusters, n_clicks):
+    if(n_clicks != 0):
+        df = pd.DataFrame(df)
+
+        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de l'arbre des décisions", style={'textAlign': 'center'})]),
 
 # Bouton submit avec Reg Mul
 @app.callback(Output('analyse_regmul', 'children'),
