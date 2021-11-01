@@ -13,7 +13,7 @@ import plotly.express as px
 class Classification():
 
     #############################################################
-    #            CONSTRUCTEUR CLASSE CLUSTERING                 #
+    #            CONSTRUCTEUR CLASSE CLASSIFICATION             #
     #############################################################
 
     def __init__(self, df, varX, varY, n_clusters):
@@ -26,48 +26,24 @@ class Classification():
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.dfX, self.dfY, test_size=0.2, random_state=5)
 
     #############################################################
-    #                        K-MEANS                            #
+    #              MACHINE A VECTEURS DE SUPPORT                #
     #############################################################
 
-    def algo_kmeans(self, df, varX, varY, n_clusters):
+    def algo_svm(self, df, varX, varY, n_clusters):
 
         # ENTRAINEMENT #
-        
-        model = KMeans(n_clusters=n_clusters)
-        clusters = model.fit(self.dfX)
-        
 
-        # Construction du graphe avec la méthode du coude pour assister l'utilisateur dans son choix de clusters
-        inertie = []
-        K_range = range(1,11)
-        inertie_table = []
-        for k in K_range:
-            model = KMeans(n_clusters=k).fit(self.dfX)
-            inertie.append(model.inertia_)
-            inertie_table.append([k, model.inertia_])
-        
-        inertie_table = pd.DataFrame(inertie_table, columns=['K_range', 'inertie'])
-        
-        plot_line = px.line(inertie_table, x="K_range", y="inertie", title="Choix du nombre de clusters")
-
-        # Construction du graphique
-        df_scatter = pd.DataFrame(self.dfX)
-        print(clusters.cluster_centers_)
-
-        # Affichage du graphique avec les différents clusters et centroïdes
-        #scatter_plot = px.scatter(clusters.cluster_centers_[:,0], model.cluster_centers_[:,1])
-
-        #cross_validation = cross_val_score(KMeans(n_clusters=self.n_clusters), self.x_train, self.y_train, cv=3, scoring='adjusted_rand_score')
+        # PREDICTION #
 
         # AFFICHAGE #
 
-        kmeans_algo_layout = html.Div(children=
+        svm_algo_layout = html.Div(children=
             [
                 html.Hr(),
                 html.Br(), 
                 html.Div(children=
                     [
-                        html.H5("Présentation de l'algorithme des K-means", style={'textAlign': 'center'}),
+                        html.H5("Présentation de l'algorithme de l'arbres de décisions", style={'textAlign': 'center'}),
                         html.Br(),
 
                         html.P("L'algorithme des K-means vous permet de visualiser comment votre dataframe créer des groupes d'individus. Vous pourrez grâce à la sélection de clusters relancer l'algorithme qui définira au mieux vos différents groupes."),
@@ -76,15 +52,81 @@ class Classification():
 
                         html.P("Afin de vous assister dans le choix de vos clusters, nous vous affichons l'inertie obtenue après chaque itération sur la méthode des K-means."),
                         html.P("La règle est simple : trouver le 'coude' qui permet de définir le nombre de clusters que votre algorithme devra comporter."),
-                        dcc.Graph(figure=plot_line, style={'width': '70%'})
+                        #dcc.Graph(figure=plot_line, style={'width': '70%'})
                     ]
                 ),
 
                 
             ]
+
         )
 
-        return kmeans_algo_layout
+        return svm_algo_layout
+
+    #############################################################
+    #            ANALYSE DISCRIMINANTE LINEAIRE                 #
+    #############################################################
+
+
+
+    #############################################################
+    #               REGRESSION LOGISTIQUE                       #
+    #############################################################
+
+
+
+
+
+
+
+    # def algo_arbre(self, df, varX, varY, n_clusters):
+
+    #     # ENTRAINEMENT #
+        
+    #     model = KMeans(n_clusters=n_clusters)
+    #     clusters = model.fit(self.dfX)
+        
+
+    #     # Construction du graphe avec la méthode du coude pour assister l'utilisateur dans son choix de clusters
+    #     inertie = []
+    #     K_range = range(1,11)
+    #     inertie_table = []
+    #     for k in K_range:
+    #         model = KMeans(n_clusters=k).fit(self.dfX)
+    #         inertie.append(model.inertia_)
+    #         inertie_table.append([k, model.inertia_])
+        
+    #     inertie_table = pd.DataFrame(inertie_table, columns=['K_range', 'inertie'])
+        
+    #     plot_line = px.line(inertie_table, x="K_range", y="inertie", title="Choix du nombre de clusters")
+
+    #     # Construction du graphique
+    #     df_scatter = pd.DataFrame(self.dfX)
+    #     print(clusters.cluster_centers_)
+
+                # kmeans_algo_layout = html.Div(children=
+        #     [
+        #         html.Hr(),
+        #         html.Br(), 
+        #         html.Div(children=
+        #             [
+        #                 html.H5("Présentation de l'algorithme des K-means", style={'textAlign': 'center'}),
+        #                 html.Br(),
+
+        #                 html.P("L'algorithme des K-means vous permet de visualiser comment votre dataframe créer des groupes d'individus. Vous pourrez grâce à la sélection de clusters relancer l'algorithme qui définira au mieux vos différents groupes."),
+
+        #                 #dcc.Graph(figure=scatter_plot, style={'width':'50%'}),
+
+        #                 html.P("Afin de vous assister dans le choix de vos clusters, nous vous affichons l'inertie obtenue après chaque itération sur la méthode des K-means."),
+        #                 html.P("La règle est simple : trouver le 'coude' qui permet de définir le nombre de clusters que votre algorithme devra comporter."),
+        #                 dcc.Graph(figure=plot_line, style={'width': '70%'})
+        #             ]
+        #         ),
+
+                
+        #     ]
+
+        # )
 
         # kmeans = cluster.KMeans(n_clusters=self.n_clusters)
         # kmeans.fit(x_train)

@@ -144,7 +144,8 @@ def parse_contents(contents, filename, date):
                         ],
                         multi=True,
                         style={'width': '300px', 'margin-left': '10px'}
-                    )
+                    ),
+                    html.Br(),
                 ]
             ),
             html.Br(),
@@ -207,9 +208,8 @@ def render_algo(onglets):
                 Input('submit-svm', 'n_clicks'))
 def affichage_algo_svm(varY, varX, df, clusters, n_clicks):
     if(n_clicks != 0):
-        df = pd.DataFrame(df)
-        algoKmeans = Classification(df, varX, varY, clusters)
-        return algoKmeans.algo_kmeans(df, varX, varY, clusters)
+
+        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme du support vecteur machine", style={'textAlign': 'center'})]),
 
 # Bouton submit avec ADL
 @app.callback(Output('analyse_adl', 'children'),
@@ -251,30 +251,34 @@ def affichage_algo_knn(varY, varX, df, clusters, n_clicks):
 
         return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la classification ascendante hiérarchique", style={'textAlign': 'center'})]),
 
-# Bouton submit analyse avec Arbre des décisions
+# Bouton submit analyse avec Arbre des décision
 @app.callback(Output('analyse_arbre', 'children'),
                 State('varY', 'value'),
                 State('varX', 'value'),
                 State('df', 'data'),
                 State('nb_feuilles', 'value'),
+                State('nb_individus', 'value'),
+                State('nb_splits', 'value'),
+                State('nb_repeats', 'value'),
                 Input('submit-arbre', 'n_clicks'))
-def affichage_algo_arbre(varY, varX, df, clusters, n_clicks):
+def affichage_algo_arbre(varY, varX, df, nb_feuilles, nb_individus, nb_splits, nb_repeats, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
-
-        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de l'arbre des décisions", style={'textAlign': 'center'})]),
+        arbre = Regression(df, varX, varY)
+        return arbre.algo_arbre(df, varX, varY, nb_feuilles, nb_individus, nb_splits, nb_repeats)
 
 # Bouton submit avec Reg Mul
 @app.callback(Output('analyse_regmul', 'children'),
                 State('varY', 'value'),
                 State('varX', 'value'),
                 State('df', 'data'),
+                State('nb_variables', 'value'),
                 Input('submit-regmul', 'n_clicks'))
-def affichage_algo_regmul(varY, varX, df, n_clicks):
+def affichage_algo_regmul(varY, varX, df, nb_variables, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
         algo_reg_mul = Regression(df, varX, varY)
-        return algo_reg_mul.regression_lineaire_multiple(df, varX, varY)
+        return algo_reg_mul.regression_lineaire_multiple(df, varX, varY, nb_variables)
 
 # Lancement du serveur
 if __name__ == '__main__':
