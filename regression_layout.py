@@ -11,6 +11,13 @@ import dash_core_components as dcc
 # Régression multiple linéaire
 regmul_layout = html.Div(children=
     [
+        html.P('Nombre de splits :'),
+        dcc.Input(id='nb_splits', value=5, type='number', min=1, max=20, step=1),
+        html.Br(),
+        html.Br(),
+        html.P('Nombre de répétitions :'),
+        dcc.Input(id='nb_repeats', value=20, type='number', min=1, max=250, step=1),
+        html.Br(),
         html.P('Nombre de variables à sélectionner :'),
         dcc.Input(id='nb_variables', value=1, type='number', min=1, max=50, step=1),
         html.Br(),

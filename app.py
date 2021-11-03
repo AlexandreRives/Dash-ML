@@ -114,10 +114,19 @@ def parse_contents(contents, filename, date):
                 data=df.to_dict('records'),
                 columns=[{'name': i, 'id': i} for i in df.columns],
                 page_size=5,
-                style_cell={'textAlign':'center'},
-                style_header={'fontWeight':'bold'}
-            ),
-            style={'margin':'20px'}),
+                style_header={
+                    'backgroundColor': 'rgb(30, 30, 30)',
+                    'color': 'white',
+                },
+                style_cell={'textAlign':'center', 
+                            'overflow': 'hidden',
+                            'textOverflow': 'ellipsis',
+                            'maxWidth': 0},
+                style_data={'backgroundColor': 'rgb(50, 50, 50)',
+                            'color': 'white',
+                            'width': '20px'
+                },
+            ), style={'margin': '20px'}),
 
             html.Hr(),
             html.Br(),
@@ -273,12 +282,14 @@ def affichage_algo_arbre(varY, varX, df, nb_feuilles, nb_individus, nb_splits, n
                 State('varX', 'value'),
                 State('df', 'data'),
                 State('nb_variables', 'value'),
+                State('nb_splits', 'value'),
+                State('nb_repeats', 'value'),
                 Input('submit-regmul', 'n_clicks'))
-def affichage_algo_regmul(varY, varX, df, nb_variables, n_clicks):
+def affichage_algo_regmul(varY, varX, df, nb_variables, nb_splits, nb_repeats, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
         algo_reg_mul = Regression(df, varX, varY)
-        return algo_reg_mul.regression_lineaire_multiple(df, varX, varY, nb_variables)
+        return algo_reg_mul.regression_lineaire_multiple(df, varX, varY, nb_variables, nb_splits, nb_repeats)
 
 # Lancement du serveur
 if __name__ == '__main__':

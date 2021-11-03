@@ -21,19 +21,12 @@ adl_layout = html.Div(children=
     [
         html.P("Taille de l'échantillon test :"),
         dcc.Input(id='t_ech_test', value=0.3, type='number', min=0, max=1, step=0.1),
-        html.Br(),
         html.P("Solveur :"),
         dcc.Dropdown(id='solv', options=[{'label' : 'svd', 'value' : 'svd'}, {'label' : 'logr', 'value' : 'logr'}, {'label' : 'eigen', 'value' : 'eigen'}], value='svd', style={'width': '300px'}),
-        html.Br(),
-        html.Br(),
         html.P('Nombre de splits :'),
         dcc.Input(id='nb_splits', value=5, type='number', min=1, max=20, step=1),
-        html.Br(),
-        html.Br(),
         html.P('Nombre de répétitions :'),
         dcc.Input(id='nb_repeats', value=20, type='number', min=1, max=99, step=1),
-        html.Br(),
-        html.Br(),
         html.Div(html.Button("Lancer l'algorithme", id='submit-adl', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),
         html.Div(id='analyse_adl'),
     ], style={'margin-left': '10px', 'margin-top': '30px'}
@@ -48,15 +41,5 @@ reglog_layout = html.Div(children=
         html.Div(id='analyse_reglog'),
     ], style={'margin-left': '10px', 'margin-top': '30px'}
 )
-
-# CAH
-# cah_layout = html.Div(children=
-#     [
-#         html.Br(),
-#         html.Br(),
-#         html.Div(html.Button("Lancer l'algorithme", id='submit-cah', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),
-#         html.Div(id='analyse_cah'),
-#     ], style={'margin-left': '10px', 'margin-top': '30px'}
-# )
 
 
