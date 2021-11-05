@@ -151,8 +151,9 @@ def parse_contents(contents, filename, date):
                         [
                             {'label': i, 'value': i} for i in df.columns
                         ],
+                        value=df.columns,
                         multi=True,
-                        style={'width': '300px', 'margin-left': '10px'}
+                        style={'width': '500px', 'margin-left': '10px'}
                     ),
                     html.Br(),
                 ]
