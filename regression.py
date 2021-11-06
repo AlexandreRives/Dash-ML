@@ -41,39 +41,47 @@ class Regression():
     def regression_lineaire_multiple(self, df, varX, varY, nb_variables, nb_splits, nb_repeats):
 
         if(len(self.x_disj.columns) < nb_variables):
-        #On lance l'algo sans sélection de variables
 
-        ##### A COMMENTER ! ######
-
-        # ENTRAINEMENT #
-        #Instanciation de l'objet de la régression linéaire multiple
-            print("on est pas dans la sélection de variables")
+            # ENTRAINEMENT #
             reg_lin_mul = LinearRegression()
             model = reg_lin_mul.fit(self.x_train, self.y_train)
-            #coeff
-            coeff_reg_lin_mul = model.coef_
-            dataframeCC = pd.Series(coeff_reg_lin_mul)
+            
+            # PREDICTION #
             y_pred = model.predict(self.x_test)
-            mco = mean_squared_error(self.y_test, y_pred)
+
+            # ESTIMATEURS #
+            mse = mean_squared_error(self.y_test, y_pred)
             r2 = r2_score(self.y_test, y_pred)
 
+            # COEFFICIENTS #
+            coeff_reg_lin_mul = model.coef_
+            dataframeCC = pd.Series(coeff_reg_lin_mul)
 
         else:
-            print("on est dans la sélection de variables")
-            #On lance l'algo avec la sélection de variables
+            # SELECTION DE VARIABLES #
             selector = SelectKBest(chi2, k = nb_variables)
             selector.fit_transform(self.x_train, self.y_train)
+
+            # ENTRAINEMENT #
             reg_lin_mul = LinearRegression()
             x_train_kbest = self.x_train.loc[:,selector.get_support()]
             x_test_kbest = self.x_test.loc[:,selector.get_support()]
             reg_lin_mul.fit(x_train_kbest, self.y_train)
+
+            # PREDICITON #
             ypred = reg_lin_mul.predict(x_test_kbest)
-            coeff_reg_lin_mul = reg_lin_mul.coef_
-            dataframeCC = pd.Series(coeff_reg_lin_mul)
+
+            # ESTIMATEURS #
             mco = mean_squared_error(self.y_test, ypred)
             r2 = r2_score(self.y_test, ypred)
+
+            # CONSTRUCTION DU GRAPHE #
             scores_table = pd.DataFrame(data={'y_test': self.y_test, 'ypred': ypred})
             plot_scatter = px.scatter(scores_table, x="y_test", y="ypred")
+
+            # COEFFICIENTS #
+            coeff_reg_lin_mul = reg_lin_mul.coef_
+            dataframeCC = pd.Series(coeff_reg_lin_mul)
 
             # VALIDATION CROISEE + CALCUL DU TEMPS #
             start = time.time()
@@ -83,19 +91,7 @@ class Regression():
             diff_time = round((end - start), 2)
             scores_moyen = round(scores.mean()*100, 2)
 
-        #Dataframe Coeff + colonnes
-        #dataframeCC = pd.Series(coeff_reg_lin_mul)
-
-        # PREDICTION #
-
-
-        # ESTIMATEURS #
-
-
         # AFFICHAGE #
-
-
-
         reg_mult_layout = html.Div(children=
             [
                 html.Br(),
