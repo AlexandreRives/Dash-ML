@@ -41,11 +41,11 @@ class Classification():
     #                     ARBRE DE DECISION                     #
     #############################################################
     
-    def algo_arbre(self, nb_feuilles, nb_individus, nb_splits, nb_repeats, standardisation = True):
+    def algo_arbre(self, nb_feuilles, nb_individus, nb_splits, nb_repeats, standardisation):
         # ------------ A) Traitement du dataset ------------
         
-        # Centrer-réduire les variables quantitatives si standardisation = True
-        if standardisation == True :
+        # Centrer-réduire les variables quantitatives si standardisation = Oui
+        if standardisation == 'Oui' :
             sc = StandardScaler()
             X_quant = pd.DataFrame(sc.fit_transform(self.dfX_quanti))
         else : 
@@ -176,10 +176,11 @@ class Classification():
     #            ANALYSE DISCRIMINANTE LINEAIRE                 #
     #############################################################
     
-    def algo_ADL(self, solv, nb_splits, nb_repeats, standardisation = True):
+    def algo_ADL(self, solv, nb_splits, nb_repeats, standardisation):
         # ------------ A) Traitement du dataset ------------
-        # Centrer-réduire les variables quantitatives si standardisation = True
-        if standardisation == True :
+        
+        # Centrer-réduire les variables quantitatives si standardisation = Oui
+        if standardisation == 'Oui' :
             sc = StandardScaler()
             X_quant = pd.DataFrame(sc.fit_transform(self.dfX_quanti))
         else : 

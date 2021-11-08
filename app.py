@@ -164,8 +164,8 @@ def parse_contents(contents, filename, date):
                         id='standardisation',
                         options=
                         [
-                            {'label': 'Oui', 'value': 'True'},
-                            {'label': 'Non', 'value': 'False'}
+                            {'label': 'Oui', 'value': 'Oui'},
+                            {'label': 'Non', 'value': 'Non'}
                         ],
                         style={'width': '300px', 'margin-left': '10px'},
                     ),
@@ -275,12 +275,18 @@ def affichage_algo_reglog(varY, varX, df, clusters, n_clicks):
                 State('varY', 'value'),
                 State('varX', 'value'),
                 State('df', 'data'),
+                State('nb_splits', 'value'),
+                State('nb_repeats', 'value'),
+                State('K', 'value'),
+                State('t_test', 'value'),
+                State('standardisation', 'value'),
                 Input('submit-knn', 'n_clicks'))
-def affichage_algo_knn(varY, varX, df, clusters, n_clicks):
+def affichage_algo_knn(varY, varX, df, nb_splits, nb_repeats, K, t_test, standardisation, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
-
-        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la classification ascendante hiérarchique", style={'textAlign': 'center'})]),
+        knn = Regression(df, varX, varY, t_test)
+        return knn.algo_knn(K, nb_splits, nb_repeats, standardisation)
+        #html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la classification ascendante hiérarchique", style={'textAlign': 'center'})]),
 
 # Bouton submit avec Reg Mul
 @app.callback(Output('analyse_regmul', 'children'),

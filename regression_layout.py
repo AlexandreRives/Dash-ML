@@ -52,6 +52,16 @@ arbre_layout = html.Div(children=
 # KNN
 knn_layout = html.Div(children=
     [
+        html.P('Nombre de splits :'),
+        dcc.Input(id='nb_splits', value=5, type='number', min=1, max=20, step=1),
+        html.Br(),
+        html.Br(),
+        html.P('Nombre de répétitions :'),
+        dcc.Input(id='nb_repeats', value=20, type='number', min=1, max=250, step=1),
+        html.Br(),
+        html.Br(),
+        html.P('Nombre de clusters :'),
+        dcc.Input(id='K', value=7, type='number', min=1, max=50, step=1),
         html.Br(),
         html.Br(),
         html.Div(html.Button("Lancer l'algorithme", id='submit-knn', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),
