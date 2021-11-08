@@ -98,9 +98,9 @@ def parse_contents(contents, filename, date):
             # File : iris.csv
             df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')), sep="[,;]", engine='python')
-        elif 'xls' in filename:
+        elif 'xlsx' in filename:
             # Excel file :
-            df = pd.read_excel(io.BytesIO(decoded), sep=";")
+            df = pd.read_excel(io.BytesIO(decoded), header=0)
     except Exception as e:
         print(e)
         return html.Div([
@@ -275,7 +275,7 @@ def affichage_algo_arbre(varY, varX, df, nb_feuilles, nb_individus, nb_splits, n
     if(n_clicks != 0):
         df = pd.DataFrame(df)
         arbre = Regression(df, varX, varY)
-        return arbre.algo_arbre(df, varX, varY, nb_feuilles, nb_individus, nb_splits, nb_repeats)
+        return arbre.algo_arbre(nb_feuilles, nb_individus, nb_splits, nb_repeats)
 
 # Bouton submit avec Reg Mul
 @app.callback(Output('analyse_regmul', 'children'),
@@ -290,7 +290,7 @@ def affichage_algo_regmul(varY, varX, df, nb_variables, nb_splits, nb_repeats, n
     if(n_clicks != 0):
         df = pd.DataFrame(df)
         algo_reg_mul = Regression(df, varX, varY)
-        return algo_reg_mul.regression_lineaire_multiple(df, varX, varY, nb_variables, nb_splits, nb_repeats)
+        return algo_reg_mul.regression_lineaire_multiple(nb_variables, nb_splits, nb_repeats)
 
 # Lancement du serveur
 if __name__ == '__main__':

@@ -18,6 +18,7 @@ class Classification():
 
     def __init__(self, df, varX, varY, n_clusters):
         
+        self.df = df
         self.varX = varX
         self.varY = varY
         self.n_clusters = n_clusters

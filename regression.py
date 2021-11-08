@@ -9,6 +9,7 @@ from sklearn.tree import plot_tree
 from sklearn.tree import export_graphviz
 from sklearn.feature_selection import RFE, SelectKBest, chi2
 from sklearn.preprocessing import StandardScaler
+from sklearn.dummy import DummyClassifier
 
 import matplotlib.pyplot as plt
 import dash_bootstrap_components as dbc
@@ -25,6 +26,7 @@ class Regression():
     #############################################################
 
     def __init__(self, df, varX, varY):
+
         self.df = df
         self.varX = varX
         self.varY = varY
@@ -33,12 +35,11 @@ class Regression():
         self.x_disj = pd.get_dummies(self.dfX, drop_first=True)
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.x_disj, self.dfY, test_size=0.33, random_state=5)
 
-
     #############################################################
     #               REGRESSION LINEAIRE MULTIPLE                #
     #############################################################
 
-    def regression_lineaire_multiple(self, df, varX, varY, nb_variables, nb_splits, nb_repeats):
+    def regression_lineaire_multiple(self, nb_variables, nb_splits, nb_repeats):
 
         if(len(self.x_disj.columns) < nb_variables):
 
@@ -51,7 +52,6 @@ class Regression():
 
             # ESTIMATEURS #
             mse = mean_squared_error(self.y_test, y_pred)
-            r2 = r2_score(self.y_test, y_pred)
 
             # COEFFICIENTS #
             coeff_reg_lin_mul = model.coef_
@@ -73,7 +73,6 @@ class Regression():
 
             # ESTIMATEURS #
             mco = mean_squared_error(self.y_test, ypred)
-            r2 = r2_score(self.y_test, ypred)
 
             # CONSTRUCTION DU GRAPHE #
             scores_table = pd.DataFrame(data={'y_test': self.y_test, 'ypred': ypred})
@@ -86,7 +85,7 @@ class Regression():
             # VALIDATION CROISEE + CALCUL DU TEMPS #
             start = time.time()
             Valid_croisee = RepeatedKFold(n_splits = nb_splits, n_repeats = nb_repeats, random_state = 0)
-            scores = cross_val_score(reg_lin_mul, self.x_train, self.y_train, cv = Valid_croisee)
+            scores = cross_val_score(reg_lin_mul, self.x_disj, self.dfY, cv = Valid_croisee)
             end = time.time()
             diff_time = round((end - start), 2)
             scores_moyen = round(scores.mean()*100, 2)
@@ -127,7 +126,7 @@ class Regression():
                 ),
                 html.Div(children=
                             [
-                                html.Span("Taux de précision en % en validation croisée : ", style={'fontWeight':'bold'}),
+                                html.Span("Taux de reconnaissance en % en validation croisée : ", style={'fontWeight':'bold'}),
                                 html.Div(scores_moyen),
                                 html.Br(),
                                 html.Span("Temps d'execution de l'algorithme en validation croisée en seconde : ", style={'fontWeight':'bold'}),
@@ -143,14 +142,16 @@ class Regression():
     #                     ARBRE DE DECISION                     #
     #############################################################
 
-    def algo_arbre(self, df, varX, varY, nb_feuilles, nb_individus, nb_splits, nb_repeats):
+    def algo_arbre(self, nb_feuilles, nb_individus, nb_splits, nb_repeats):
 
         # ENTRAINEMENT #
         model = DecisionTreeClassifier(max_depth=nb_feuilles, max_leaf_nodes=nb_individus, random_state=5)
         model = model.fit(self.x_train, self.y_train)
 
+        
+
         # IMPORTANCE DE VARIABLES #
-        importance_var = {"Variables":varX, "Importance des variables":model.feature_importances_}
+        importance_var = {"Variables":self.varX, "Importance des variables":model.feature_importances_}
         importance_var = pd.DataFrame(importance_var).sort_values(by="Importance des variables", ascending=False)
 
         # PREDICTION #
@@ -170,7 +171,7 @@ class Regression():
         # VALIDATION CROISEE + CALCUL DU TEMPS #
         start = time.time()
         Valid_croisee = RepeatedKFold(n_splits = nb_splits, n_repeats = nb_repeats, random_state = 0)
-        scores = cross_val_score(model, self.x_train, self.y_train, cv = Valid_croisee)
+        scores = cross_val_score(model, self.dfX, self.dfY, cv = Valid_croisee)
         end = time.time()
         diff_time = round((end - start), 2)
         scores_moyen = round(scores.mean()*100, 2)
@@ -237,7 +238,7 @@ class Regression():
                             },
                         ),style={'margin':'20px'}),
                         html.Br(),
-                        html.H5("Graphe de l'évolution du taux de précision en validation croisée", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+                        html.H5("Graphe de l'évolution du taux de reconnaissance en validation croisée", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         dcc.Graph(figure=plot_line, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
                         html.Br(),
                         html.Div(children=
