@@ -64,11 +64,11 @@ app_layout = html.Div(children=
     # Onglets de sélection des algorithmes
     dcc.Tabs(id="algos", children=
         [
-            dcc.Tab(label='Support Vecteur Machine', value='svm', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
+            dcc.Tab(label='Arbre de Décision', value='arbre', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
             dcc.Tab(label='Analyse Discriminante Linéaire', value='adl', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
             dcc.Tab(label='Régression Logisitque', value='reglog', style={'color':'black', 'text-shadow': '0px 0px 5px red', 'font-size':'1.1em'}),
             dcc.Tab(label='K Plus Proches Voisins', value='knn', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
-            dcc.Tab(label='Arbre de Décision', value='arbre', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
+            dcc.Tab(label='ElasticNet', value='elastic', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
             dcc.Tab(label='Régression Linéaire Multiple', value='regmul', style={'color':'black', 'text-shadow': '0px 0px 5px blue', 'font-size':'1.1em'}),
         ]
     ),
@@ -157,6 +157,18 @@ def parse_contents(contents, filename, date):
                         style={'width': '500px', 'margin-left': '10px'}
                     ),
                     html.Br(),
+                    html.H6("Taille de l'échantillon test :", style={'text-decoration': 'underline', 'margin-left':'10px'}),
+                    dcc.Input(id='t_test', value=0.3, type='number', min=0.05, max=1, step=0.05, style={'margin-left': '20px'}),
+                    html.H6(children="Voulez-vous centrer et réduire ?", style={'text-decoration': 'underline', 'margin-left': '10px'}),
+                    dcc.Dropdown(
+                        id='standardisation',
+                        options=
+                        [
+                            {'label': 'Oui', 'value': 'True'},
+                            {'label': 'Non', 'value': 'False'}
+                        ],
+                        style={'width': '300px', 'margin-left': '10px'},
+                    ),
                 ]
             ),
             html.Br(),
@@ -186,18 +198,17 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
                 Input('algos', 'value'))
 def render_algo(onglets):
 
-    # Support Vector Machine
-    if onglets == 'svm':
-        return classification_layout.SVM_layout
+    # Arbre de Décision
+    if onglets == 'arbre':
+        return classification_layout.arbre_layout
+
+    # Analyse disciminante linéaire
+    elif onglets == 'adl':
+        return classification_layout.adl_layout
 
     # Régression logistique
     elif onglets == 'reglog':
         return classification_layout.reglog_layout
-
-    # Analyse disciminante linéaire
-    elif onglets == 'adl':
-        # Mise en forme : séparer en plusieurs children. Voir : https://dash.plotly.com/layout
-        return classification_layout.adl_layout
 
     # K plus proches voisins
     elif onglets == 'knn':
@@ -211,32 +222,41 @@ def render_algo(onglets):
     elif onglets == 'regmul':
         return regression_layout.regmul_layout
 
-# Bouton submit analyse avec SVM
-@app.callback(Output('analyse_svm', 'children'),
+# Bouton submit analyse avec Arbre des décision
+@app.callback(Output('analyse_arbre', 'children'),
                 State('varY', 'value'),
                 State('varX', 'value'),
                 State('df', 'data'),
-                Input('submit-svm', 'n_clicks'))
-def affichage_algo_svm(varY, varX, df, clusters, n_clicks):
+                State('nb_feuilles', 'value'),
+                State('nb_individus', 'value'),
+                State('nb_splits', 'value'),
+                State('nb_repeats', 'value'),
+                State('t_test', 'value'),
+                State('standardisation', 'value'),
+                Input('submit-arbre', 'n_clicks'))
+def affichage_algo_arbre(varY, varX, df, nb_feuilles, nb_individus, nb_splits, nb_repeats, t_test, standardisation, n_clicks):
     if(n_clicks != 0):
-
-        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme du support vecteur machine", style={'textAlign': 'center'})]),
+        df = pd.DataFrame(df)
+        arbre = Classification(df, varX, varY, t_test)
+        return arbre.algo_arbre(nb_feuilles, nb_individus, nb_splits, nb_repeats, standardisation)
 
 # Bouton submit avec ADL
 @app.callback(Output('analyse_adl', 'children'),
                 State('varY', 'value'),
                 State('varX', 'value'),
                 State('df', 'data'),
-                State('nb_splits', 'value'),
-                State('t_ech_test', 'value'),
                 State('solv', 'value'),
+                State('nb_splits', 'value'),
                 State('nb_repeats', 'value'),
+                State('t_test', 'value'),
+                State('standardisation', 'value'),
                 Input('submit-adl', 'n_clicks'))
-def affichage_algo_adl(varY, varX, df, nb_splits, t_ech_test, solv, nb_repeats, n_clicks):
+def affichage_algo_adl(varY, varX, df, solv, nb_splits, nb_repeats, t_test, standardisation, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
-
-        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de l'analyse discriminante linéaire", style={'textAlign': 'center'})]),
+        adl = Classification(df, varX, varY, t_test)
+        return adl.algo_ADL(solv, nb_splits, nb_repeats, standardisation)
+        #html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de l'analyse discriminante linéaire", style={'textAlign': 'center'})]),
 
 # Bouton submit avec Reg Log
 @app.callback(Output('analyse_reglog', 'children'),
@@ -261,22 +281,6 @@ def affichage_algo_knn(varY, varX, df, clusters, n_clicks):
         df = pd.DataFrame(df)
 
         return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la classification ascendante hiérarchique", style={'textAlign': 'center'})]),
-
-# Bouton submit analyse avec Arbre des décision
-@app.callback(Output('analyse_arbre', 'children'),
-                State('varY', 'value'),
-                State('varX', 'value'),
-                State('df', 'data'),
-                State('nb_feuilles', 'value'),
-                State('nb_individus', 'value'),
-                State('nb_splits', 'value'),
-                State('nb_repeats', 'value'),
-                Input('submit-arbre', 'n_clicks'))
-def affichage_algo_arbre(varY, varX, df, nb_feuilles, nb_individus, nb_splits, nb_repeats, n_clicks):
-    if(n_clicks != 0):
-        df = pd.DataFrame(df)
-        arbre = Regression(df, varX, varY)
-        return arbre.algo_arbre(nb_feuilles, nb_individus, nb_splits, nb_repeats)
 
 # Bouton submit avec Reg Mul
 @app.callback(Output('analyse_regmul', 'children'),
