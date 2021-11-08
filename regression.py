@@ -148,8 +148,6 @@ class Regression():
         model = DecisionTreeClassifier(max_depth=nb_feuilles, max_leaf_nodes=nb_individus, random_state=5)
         model = model.fit(self.x_train, self.y_train)
 
-        
-
         # IMPORTANCE DE VARIABLES #
         importance_var = {"Variables":self.varX, "Importance des variables":model.feature_importances_}
         importance_var = pd.DataFrame(importance_var).sort_values(by="Importance des variables", ascending=False)
@@ -244,10 +242,10 @@ class Regression():
                         html.Div(children=
                             [
 
-                                html.Span("Taux de précision en % sur le dataset en 70/30 : ", style={'fontWeight':'bold'}),
+                                html.Span("Taux de reconaissance en % sur le dataset en 70/30 : ", style={'fontWeight':'bold'}),
                                 html.Div(tx_precision),
                                 html.Br(),
-                                html.Span("Taux de précision en % en validation croisée : ", style={'fontWeight':'bold'}),
+                                html.Span("Taux de reconaissance en % en validation croisée : ", style={'fontWeight':'bold'}),
                                 html.Div(scores_moyen),
                                 html.Br(),
                                 html.Span("Temps d'execution de l'algorithme en validation croisée en seconde : ", style={'fontWeight':'bold'}),

@@ -5,6 +5,7 @@ import pandas as pd
 import dash_bootstrap_components as dbc
 import classification_layout
 import regression_layout
+import cchardet as chardet
 
 from dash.dependencies import Input, Output, State
 from dash import dcc
@@ -95,9 +96,9 @@ def parse_contents(contents, filename, date):
     decoded = base64.b64decode(content_string)
     try:
         if 'csv' in filename:
-            # File : iris.csv
-            df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')), sep="[,;]", engine='python')
+            detection = chardet.detect(decoded)
+            encoding = detection["encoding"]
+            df = pd.read_csv(io.StringIO(decoded.decode(encoding)), sep="[,;]", engine='python')
         elif 'xlsx' in filename:
             # Excel file :
             df = pd.read_excel(io.BytesIO(decoded), header=0)
