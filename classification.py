@@ -30,8 +30,14 @@ class Classification():
     def __init__(self, df, varX, varY, t_test):
         self.df = df
         self.varX = varX
+        dict_X = []
+        for i in range(0, len(self.varX)):
+            dict_X.append(list(varX[i].values()))
+        liste_X = []
+        for i in range(0, len(dict_X)):
+            liste_X.append(dict_X[i][0])
         self.varY = varY
-        self.dfX = df[varX]
+        self.dfX = df[liste_X]
         self.dfX_quanti = self.dfX.select_dtypes(include=[np.number])
         self.dfX_quali = self.dfX.select_dtypes(exclude=[np.number])
         self.dfY = df[varY]

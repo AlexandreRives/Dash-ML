@@ -28,14 +28,23 @@ class Regression():
     def __init__(self, df, varX, varY, t_test):
         self.df = df
         self.varX = varX
+        dict_X = []
+        for i in range(0, len(self.varX)):
+            dict_X.append(list(varX[i].values()))
+        liste_X = []
+        for i in range(0, len(dict_X)):
+            liste_X.append(dict_X[i][0])
         self.varY = varY
-        self.dfX = df[varX]
+        self.dfX = df[liste_X]
         self.dfX_quanti = self.dfX.select_dtypes(include=[np.number])
         self.dfX_quali = self.dfX.select_dtypes(exclude=[np.number])
         self.dfY = df[varY]
         self.t_test = t_test
 
 
+    #############################################################
+    #                    K PLUS PROCHES VOISINS                 #
+    #############################################################
     def algo_knn(self, K, nb_splits, nb_repeats, standardisation):
         # ------------ A) Traitement du dataset ------------
         
@@ -141,21 +150,6 @@ class Regression():
 
         return knn_algo_layout
 
-
-    #############################################################
-    #              CONSTRUCTEUR CLASSE REGRESSION               #
-    #############################################################
-
-    # def __init__(self, df, varX, varY):
-
-    #     self.df = df
-    #     self.varX = varX
-    #     self.varY = varY
-    #     self.dfX = self.df[self.varX]
-    #     self.dfY = self.df[self.varY]
-    #     self.x_disj = pd.get_dummies(self.dfX, drop_first=True)
-    #     self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.x_disj, self.dfY, test_size=0.33, random_state=5)
-
     # #############################################################
     # #               REGRESSION LINEAIRE MULTIPLE                #
     # #############################################################
@@ -258,10 +252,6 @@ class Regression():
     #     )
 
     #     return reg_mult_layout
-
-    # #############################################################
-    # #                   K PLUS PROCHES VOISINS                  #
-    # #############################################################
 
 
 

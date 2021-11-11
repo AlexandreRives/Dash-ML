@@ -142,6 +142,7 @@ def parse_contents(contents, filename, date):
                         [
                             {'label': i, 'value': i} for i in df.columns
                         ],
+                        value=df.columns[0],
                         style={'width': '300px', 'margin-left': '10px'},
                     ),
                     html.Br(),
@@ -150,7 +151,7 @@ def parse_contents(contents, filename, date):
                         id='varX',
                         options=
                         [
-                            {'label': i, 'value': i} for i in df.columns
+                            #{'label': i, 'value': i} for i in df.columns
                         ],
                         value=df.columns,
                         multi=True,
@@ -180,6 +181,15 @@ def parse_contents(contents, filename, date):
             html.P("3. Choix de l'algorithme", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
         ]
     )
+
+# Update des variables X pour ne pas prendre la variable Y dans la liste
+@app.callback(Output('varX', 'options'),
+                 Input('varY', 'value'),
+                 State('varX', 'value'))
+def update_X(varY, varX):
+    varX = [i for i in varX if i != varY]
+    dico = [{'label': i, 'value': i} for i in varX]
+    return dico
 
 # Mis à jour du tableau en fonction du fichier qui est importé
 @app.callback(Output('output-data-upload', 'children'),
@@ -225,7 +235,7 @@ def render_algo(onglets):
 # Bouton submit analyse avec Arbre des décision
 @app.callback(Output('analyse_arbre', 'children'),
                 State('varY', 'value'),
-                State('varX', 'value'),
+                State('varX', 'options'),
                 State('df', 'data'),
                 State('nb_feuilles', 'value'),
                 State('nb_individus', 'value'),
@@ -243,7 +253,7 @@ def affichage_algo_arbre(varY, varX, df, nb_feuilles, nb_individus, nb_splits, n
 # Bouton submit avec ADL
 @app.callback(Output('analyse_adl', 'children'),
                 State('varY', 'value'),
-                State('varX', 'value'),
+                State('varX', 'options'),
                 State('df', 'data'),
                 State('solv', 'value'),
                 State('nb_splits', 'value'),
@@ -261,7 +271,7 @@ def affichage_algo_adl(varY, varX, df, solv, nb_splits, nb_repeats, t_test, stan
 # Bouton submit avec Reg Log
 @app.callback(Output('analyse_reglog', 'children'),
                 State('varY', 'value'),
-                State('varX', 'value'),
+                State('varX', 'options'),
                 State('df', 'data'),
                 Input('submit-reglog', 'n_clicks'))
 def affichage_algo_reglog(varY, varX, df, clusters, n_clicks):
@@ -273,7 +283,7 @@ def affichage_algo_reglog(varY, varX, df, clusters, n_clicks):
 # Bouton submit avec KNN
 @app.callback(Output('analyse_knn', 'children'),
                 State('varY', 'value'),
-                State('varX', 'value'),
+                State('varX', 'options'),
                 State('df', 'data'),
                 State('nb_splits', 'value'),
                 State('nb_repeats', 'value'),
@@ -291,7 +301,7 @@ def affichage_algo_knn(varY, varX, df, nb_splits, nb_repeats, K, t_test, standar
 # Bouton submit avec Reg Mul
 @app.callback(Output('analyse_regmul', 'children'),
                 State('varY', 'value'),
-                State('varX', 'value'),
+                State('varX', 'options'),
                 State('df', 'data'),
                 State('nb_variables', 'value'),
                 State('nb_splits', 'value'),
