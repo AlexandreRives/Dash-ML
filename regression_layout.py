@@ -19,18 +19,15 @@ regmul_layout = html.Div(children=
         dcc.Input(id='nb_repeats', value=20, type='number', min=1, max=250, step=1),
         html.Br(),
         html.Br(),
-        html.P('Nombre de variables à sélectionner :'),
-        dcc.Input(id='nb_variables', value=1, type='number', min=1, max=50, step=1),
-        html.Br(),
-        html.Br(),
         html.Div(html.Button("Lancer l'algorithme", id='submit-regmul', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),
         html.Div(id='analyse_regmul'),
     ], style={'margin-left': '10px', 'margin-top': '30px'}
 )
     
 # ElasticNet
-arbre_layout = html.Div(children=
+elasticnet_layout = html.Div(children=
     [
+        html.H6(children="Paramètres validation croisée : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
         html.P('Nombre de splits :'),
         dcc.Input(id='nb_splits', value=5, type='number', min=1, max=20, step=1),
         html.Br(),
@@ -38,14 +35,23 @@ arbre_layout = html.Div(children=
         html.P('Nombre de répétitions :'),
         dcc.Input(id='nb_repeats', value=20, type='number', min=1, max=250, step=1),
         html.Br(),
-        html.P("Choisir le nombre de feuilles :"),
-        dcc.Input(id='nb_feuilles', value=5, type='number', min=5, max=50, step=1),
-        html.P("Choisir le nombre de d'individus :"),
-        dcc.Input(id='nb_individus', value=5, type='number', min=5, max=10000, step=1),
+        html.Br(),
+        html.H6(children="Paramètres de l'algorithme : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
+        html.P("Nombre d'itérations :"),
+        dcc.Input(id='iterations', value=100, type='number', min=1, max=1000, step=1), 
         html.Br(),
         html.Br(),
-        html.Div(html.Button("Lancer l'algorithme", id='submit-arbre', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),
-        html.Div(id='analyse_arbre'),
+        html.P("Hyper-paramètre Alpha :"),
+        dcc.Input(id='alpha', value=0.1, type='number', min=0, max=20, step=0.01), 
+        html.Br(),
+        html.Br(),
+        html.P("L1 ratio - curseur de répartition des pénalités Ridge et Lasso : "),
+        html.P("0 = Lasso, 1 = Ridge. Entre les 2, combinaisons des 2."),
+        dcc.Input(id='l1_ratio', value=0.5, type='number', min=0, max=1, step=0.05),
+        html.Br(),
+        html.Br(),
+        html.Div(html.Button("Lancer l'algorithme", id='submit-elastic', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),
+        html.Div(id='analyse_elastinet'),
     ], style={'margin-left': '10px', 'margin-top': '30px'}
 )
 

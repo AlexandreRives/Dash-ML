@@ -2,24 +2,24 @@ from dash import html
 from dash import dash_table, dcc
 from sklearn import cluster, metrics
 from sklearn.model_selection import cross_val_score, train_test_split
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from plotly import tools
 
 import dash_bootstrap_components as dbc
 import pandas as pd
 import numpy as np
 import plotly.express as px
-
 import os
 import pandas as pd
 import time
-import plotly.express as px
-
-
+import plotly.graph_objs as go
+import plotly.figure_factory as ff
 from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_score, RepeatedKFold, train_test_split
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
 
 class Classification():
 
@@ -76,14 +76,7 @@ class Classification():
         end = time.time()
        
         temps = round((end - start), 2)
-
-        # PLOT DE LA VALIDATION CROISEE #
-        K_range = []
-        for i in range(1, (nb_repeats*nb_splits)+1):
-            K_range.append(i)
-        scores_table = pd.DataFrame(data={'K_range': K_range, 'scores': scores})
-        plot_line = px.line(scores_table, x="K_range", y="scores")
-        
+    
         # ------------ D) Estimation ponctuelle -----------
         XTrain,XTest,yTrain,yTest = train_test_split(X_ok, self.dfY, test_size = self.t_test, random_state = 42)
        
@@ -95,9 +88,33 @@ class Classification():
         importance_var = pd.DataFrame(importance_var).sort_values(by="Importance des variables", ascending=False)
 
         # METRIQUES #
-        mc = pd.crosstab(yTest,ypred)
-        new_mc = confusion_matrix(yTest, ypred)
-        tx_reconaissance = (sum(np.diag(new_mc)) / len(XTest)) * 100  
+        #Matrice de confusion
+        mc = confusion_matrix(yTest, ypred, labels=model.classes_)
+        #mc = pd.crosstab(yTest,ypred)
+        #new_mc = confusion_matrix(yTest, ypred)
+        tx_reconaissance = (sum(np.diag(mc)) / len(XTest)) * 100  
+
+        # ------------ F) Visualisation -----------
+        
+        #Récupération des labels dans l'attribut .classes_
+        labels = model.classes_.reshape(1,len(model.classes_))
+        
+        label_obs = []
+        for j in range(len(model.classes_)):
+            label_obs.append(labels[0,j])
+       
+        #Création des labels prédiction
+        label_pred = [label + " pred" for label in label_obs]
+               
+        #Matrice de confusion
+        fig = ff.create_annotated_heatmap(z = mc, 
+                                        x=label_pred, 
+                                        y=label_obs) 
+
+        #Estimateurs de la validation croisée
+        fig2 = go.Figure(data=go.Scatter(y=scores,
+                                        mode='lines+markers',
+                                        name='Scores'))
 
         # AFFICHAGE DU LAYOUT #
         arbre_algo_layout = html.Div(children=
@@ -136,27 +153,10 @@ class Classification():
                         html.Br(),
                         html.P("Enfin, nous vous affichons la matrice de confusion avec la métrique suivante  : le taux d'erreur."),
                         html.H5("Matrice de confusion", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        html.Div(dash_table.DataTable(
-                            id='matrice_de_confusion',
-                            data=mc.to_dict('records'),
-                            columns=[{'name': i, 'id': i} for i in arbre.classes_],
-                            style_header={
-                                'backgroundColor': 'rgb(30, 30, 30)',
-                                'color': 'white',
-                            },
-                            style_cell={'textAlign':'center', 
-                                        'overflow': 'hidden',
-                                        'textOverflow': 'ellipsis',
-                                        'maxWidth': 0},
-                            style_data={'backgroundColor': 'rgb(50, 50, 50)',
-                                        'color': 'white',
-                                        'width': '20px'
-                            },
-                        ),style={'margin':'20px'}),
-                        html.Br(),
+                        dcc.Graph(figure = fig, style={'width': '50%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
+                        
                         html.H5("Graphe de l'évolution du taux de reconnaissance en validation croisée", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        dcc.Graph(figure=plot_line, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
-                        html.Br(),
+                        dcc.Graph(figure=fig2, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
                         html.Div(children=
                             [
 
@@ -212,12 +212,14 @@ class Classification():
 
         temps = round((end - start), 2)
 
-        # PLOT DE LA VALIDATION CROISEE #
-        K_range = []
-        for i in range(1, (nb_repeats*nb_splits)+1):
-            K_range.append(i)
-        scores_table = pd.DataFrame(data={'K_range': K_range, 'scores': scores})
-        plot_line = px.line(scores_table, x="K_range", y="scores")
+        # # PLOT DE LA VALIDATION CROISEE #
+        # K_range = []
+        # for i in range(1, (nb_repeats*nb_splits)+1):
+        #     K_range.append(i)
+        # scores_table = pd.DataFrame(data={'K_range': K_range, 'scores': scores})
+        # plot_line = px.line(scores_table, x="K_range", y="scores")
+
+        
         
         # ------------ D) Estimation ponctuelle -----------
         XTrain,XTest,yTrain,yTest = train_test_split(X_ok, self.dfY, test_size = self.t_test, random_state = 42)
@@ -232,13 +234,36 @@ class Classification():
         Aff_df = pd.DataFrame(Aff, columns=["Axe1","Axe2"]) 
         Aff_df["yPred"] = predLda
         
-        # Affichage
-        plot_scatter = px.scatter(Aff_df, x="Axe1", y="Axe2", color='yPred')
+
 
         # METRIQUES #
-        mc = pd.crosstab(yTest,predLda)
-        new_mc = confusion_matrix(yTest, predLda)
-        tx_reconaissance = (sum(np.diag(new_mc)) / len(XTest)) * 100
+        mc = confusion_matrix(yTest, predLda, labels=model.classes_)
+        tx_reconaissance = (sum(np.diag(mc)) / len(XTest)) * 100
+
+        # ------------ F) Visualisation -----------
+        
+        #Récupération des labels dans l'attribut .classes_
+        labels = lda.classes_.reshape(1,len(lda.classes_))
+        
+        label_obs = []
+        for j in range(len(lda.classes_)):
+            label_obs.append(labels[0,j])
+       
+        #Création des labels prédiction
+        label_pred = [label + " pred" for label in label_obs]
+               
+        #Matrice de confusion
+        fig = ff.create_annotated_heatmap(z = mc, 
+                                        x=label_pred, 
+                                        y=label_obs) 
+
+        #Estimateurs de la validation croisée
+        fig2 = go.Figure(data=go.Scatter(y=scores,
+                                        mode='lines+markers',
+                                        name='Scores'))
+
+        #Visualisation ponctuelle
+        fig3 = px.scatter(Aff_df, x="Axe1", y="Axe2", color='yPred')
 
         # AFFICHAGE DU LAYOUT #
         adl_algo_layout = html.Div(children=
@@ -249,67 +274,27 @@ class Classification():
                     [
                         html.H4("Présentation de l'algorithme de l'analyse discriminante linéaire", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         html.Br(),
-
                         html.P("L'algorithme de l'analyse discriminante linéaire vous permet de visualiser comment votre dataframe classe vos différents individus. Vous pourrez grâce à la sélection de feuilles et du nombre maximum d'individus par feuille relancer l'algorithme qui classifiera au mieux vos individus."),
-
-                        # html.Div(dash_table.DataTable(
-                        #     id='importance',
-                        #     data=importance_var.to_dict('records'),
-                        #     columns=[{'name': i, 'id': i} for i in importance_var.columns],
-                        #     style_header={
-                        #         'backgroundColor': 'rgb(30, 30, 30)',
-                        #         'color': 'white',
-                        #     },
-                        #     style_cell={'textAlign':'center', 
-                        #                 'overflow': 'hidden',
-                        #                 'textOverflow': 'ellipsis',
-                        #                 'maxWidth': 0},
-                        #     style_data={'backgroundColor': 'rgb(50, 50, 50)',
-                        #                 'color': 'white',
-                        #                 'width': '20px'
-                        #     },
-                        # ),style={'margin-right':'200px', 'margin-left':'200px'}),
                         html.Br(),
                         html.P("Enfin, nous vous affichons la matrice de confusion avec la métrique suivante  : le taux d'erreur."),
                         html.H5("Matrice de confusion", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        html.Div(dash_table.DataTable(
-                            id='matrice_de_confusion',
-                            data=mc.to_dict('records'),
-                            columns=[{'name': i, 'id': i} for i in lda.classes_],
-                            style_header={
-                                'backgroundColor': 'rgb(30, 30, 30)',
-                                'color': 'white',
-                            },
-                            style_cell={'textAlign':'center', 
-                                        'overflow': 'hidden',
-                                        'textOverflow': 'ellipsis',
-                                        'maxWidth': 0},
-                            style_data={'backgroundColor': 'rgb(50, 50, 50)',
-                                        'color': 'white',
-                                        'width': '20px'
-                            },
-                        ),style={'margin':'20px'}),
+                        dcc.Graph(figure=fig, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
                         html.Br(),
                         html.H5("Graphe de l'évolution du taux de reconnaissance en validation croisée", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        dcc.Graph(figure=plot_line, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
-                        html.Br(),
-                        html.Div(children=
-                            [
-                                html.Span("Taux de reconaissance en % en validation croisée : ", style={'fontWeight':'bold'}),
-                                html.Div(round((scores.mean()*100.0), 2)),
-                                html.Br(),
-                                html.Span("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold'}),
-                                html.Div(temps)
-                            ]
-                        ),
+                        dcc.Graph(figure=fig2, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
                         html.H5("Visualisation ponctuelle", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        dcc.Graph(figure=plot_scatter, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
+                        dcc.Graph(figure=fig3, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
                         html.Br(),
                         html.Div(children=
                             [
                                 html.Span("Taux de reconaissance en % sur le dataset en estimation ponctuelle : ", style={'fontWeight':'bold'}),
                                 html.Div(round(tx_reconaissance, 2)),
-                                html.Br()
+                                html.Br(),
+                                html.Span("Taux de reconaissance en % en validation croisée : ", style={'fontWeight':'bold'}),
+                                html.Div(round((scores.mean()*100.0), 2)),
+                                html.Br(),
+                                html.Span("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold'}),
+                                html.Div(temps)
                             ]
                         )
 
@@ -324,3 +309,171 @@ class Classification():
     #               REGRESSION LOGISTIQUE                       #
     #############################################################
     
+    def Regression_log(self, nb_splits, nb_repeats, standardisation, iterations, l1_ratio, C):
+        ''' Options
+        
+        nb_splits : nombre de scission du dataset pour la validation croisée ====> nb positif entier
+        
+        n_repeats : nombre de répétition de la validation croisée ====> nb positif entier
+        
+        standardisation : centrer-réduire les données ====> 'oui' ou 'non'
+        
+        iterations : itération max dans l'instanciation du modèle ====> nb positif entier
+        
+        l1_ratio : curseur entre la pénalisation Ridge et Lasso ====> 0 (l2) <= l1_ratio <= 1 (l1)
+       
+        C : hyperparamètre permettant d'allouer une plus forte pénalité aux données (C faible), ie on fait peu confiance au caractère généralisable des données, ou à la complexité du modèle ie on fait confiance aux données (C grand) 
+        
+        cores ====> nb de coeurs pour le calcul parallèle. Si = 1, pas de parallélisation, si = -1, tous les coeurs sont utilisés, si = -2, tous les coeurs sauf 1 sont utilisés, etc.'''
+
+
+        # ------------ A) Traitement du dataset ------------
+        
+        # Centrer-réduire les variables quantitatives si standardisation = Oui
+        if standardisation == 'Oui' :
+            sc = StandardScaler()
+            X_quant = pd.DataFrame(sc.fit_transform(self.dfX_quanti))
+        else : 
+            X_quant = self.dfX_quanti
+
+        # Recoder les variables qualitatives
+        if self.dfX_quali.shape[1] == 0:
+            X_ok = X_quant
+        
+        else:
+            X_qual = pd.get_dummies(self.dfX_quali, 
+                                    drop_first=True)
+            # Concatener X_qual et X_quant 
+            X_ok = pd.concat([X_quant,X_qual], axis = 1)
+
+        # ------------ B) Instanciation du modèle -----------
+        
+        if len(np.unique(self.dfY))==2 : #si la variable cible a 2 modalités : régression logistique binaire
+            #instanciation du modèle binaire
+            lr = LogisticRegression(solver = 'saga', 
+                                    max_iter = iterations, 
+                                    penalty = 'elasticnet', 
+                                    l1_ratio = l1_ratio, 
+                                    C=C)
+        
+        #si la variable cible a plus de 2 modalités : régression logistique multiclasse
+        else:
+            #instanciation du modèle multiclasse
+            lr = LogisticRegression(solver = 'saga', 
+                                    max_iter = iterations, 
+                                    penalty = 'elasticnet', 
+                                    l1_ratio = l1_ratio, 
+                                    multi_class = 'ovr', 
+                                    C=C) 
+        
+        #si la variable a moins de 2 modalités : renvoie une erreur
+        # else:
+        #     raise ValueError('La variable cible ne possède pas assez de modalités. Minimum : 2')
+
+        # ------------ C) Split en échantillons d'apprentissage et de test -----------
+
+        #Scission du dataset en échantillons d'apprentissage et test
+        XTrain, XTest, yTrain, yTest = train_test_split(X_ok, 
+                                                        self.dfY, 
+                                                        test_size = self.t_test, 
+                                                        random_state = 42)
+
+        #Entraînement
+        lr.fit(XTrain, yTrain)
+
+        #Prédiction
+        y_pred = lr.predict(XTest)
+
+        # ------------ D) Performance -----------
+        
+        #Matrice de confusion
+        mc = confusion_matrix(yTest, 
+                            y_pred, 
+                            labels=lr.classes_)
+        
+        #Accuracy
+        accuracy = accuracy_score(yTest, y_pred)
+        
+        #Coefficients du modèle
+        #coeff = lr.coef_ 
+        
+        #taux de reconnaissane :
+        tx_reco = (sum(np.diag(mc)) / len(XTest)) * 100
+
+        # ------------ E) Validation croisée -----------
+
+        crossv  = RepeatedKFold(n_splits = nb_splits, 
+                                n_repeats = nb_repeats, 
+                                random_state=0)
+        
+        start = time.time()
+        scores = cross_val_score(lr, 
+                                X_ok, 
+                                self.dfY, 
+                                cv= crossv, 
+                                scoring = 'accuracy') 
+        end = time.time()
+        
+        temps = round((end - start), 2)
+
+        # ------------ F) Visualisation -----------
+        
+        #Récupération des labels dans l'attribut .classes_
+        labels = lr.classes_.reshape(1,len(lr.classes_))
+        
+        label_obs = []
+        for j in range(len(lr.classes_)):
+            label_obs.append(labels[0,j])
+       
+        #Création des labels prédiction
+        label_pred = [label + " pred" for label in label_obs]
+               
+        #Matrice de confusion
+        fig = ff.create_annotated_heatmap(z = mc, 
+                                        x=label_pred, 
+                                        y=label_obs) 
+
+        #Estimateurs de la validation croisée
+        fig2 = go.Figure(data=go.Scatter(y=scores,
+                                        mode='lines+markers',
+                                        name='Scores'))
+        
+        regression_logistic_layout = html.Div(children=
+            [
+                html.Hr(),
+                html.Br(), 
+                html.Div(children=
+                    [
+                        html.H4("Présentation de l'algorithme de la régression logistique", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+                        html.Br(),
+                        html.P("L'algorithme de régression logistique vous permet de visualiser comment le modèle classe vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui prédira au mieux vos individus."),
+                        html.Br(),
+                        html.P("Enfin, nous vous affichons la matrice de confusion avec la métrique suivante  : le taux de reconnaissance."),
+                        html.H5("Matrice de confusion", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+                        dcc.Graph(figure = fig, style={'width': '50%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
+                        html.Br(),
+                        html.H5("Evolution des estimateurs de la validation croisée", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+                        dcc.Graph(figure = fig2, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
+                        html.Br(),
+                        html.Div(children=
+                            [
+                                html.Span("Taux de reconaissance en % en validation croisée : ", style={'fontWeight':'bold'}),
+                                html.Div(round((scores.mean()*100.0), 2)),
+                                html.Span("Taux de reconnaissance en estimation ponctuelle : ", style={'fontWeight':'bold'}),
+                                html.Div(round(tx_reco, 2)),
+                                html.Br(),
+                                # html.Span("Coefficients du modèle : ", style={'fontWeight':'bold'}),
+                                # html.Div(coeff),
+                                html.Br(),
+                                html.Span("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold'}),
+                                html.Div(temps),
+
+                            ]
+                        )
+
+                    ]
+                ),   
+            ]
+        )
+
+        return regression_logistic_layout

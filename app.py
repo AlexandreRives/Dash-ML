@@ -224,9 +224,9 @@ def render_algo(onglets):
     elif onglets == 'knn':
         return regression_layout.knn_layout
    
-        # Arbre de décision
-    elif onglets == 'arbre':
-        return regression_layout.arbre_layout
+    # Elasticnet
+    elif onglets == 'elastic':
+        return regression_layout.elasticnet_layout
 
     # Régression linéraire multiple
     elif onglets == 'regmul':
@@ -273,12 +273,20 @@ def affichage_algo_adl(varY, varX, df, solv, nb_splits, nb_repeats, t_test, stan
                 State('varY', 'value'),
                 State('varX', 'options'),
                 State('df', 'data'),
+                State('nb_splits', 'value'),
+                State('nb_repeats', 'value'),
+                State('t_test', 'value'),
+                State('standardisation', 'value'),
+                State('iterations', 'value'),
+                State('l1_ratio', 'value'),
+                State('C', 'value'),         
                 Input('submit-reglog', 'n_clicks'))
-def affichage_algo_reglog(varY, varX, df, clusters, n_clicks):
+def affichage_algo_reglog(varY, varX, df, nb_splits, nb_repeats, t_test, standardisation, iterations, l1_ratio, C, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
-        
-        return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la régression logistique", style={'textAlign': 'center'})]),
+        regLog = Classification(df, varX, varY, t_test)
+        return regLog.Regression_log(nb_splits, nb_repeats, standardisation, iterations, l1_ratio, C)
+        #return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la régression logistique", style={'textAlign': 'center'})]),
 
 # Bouton submit avec KNN
 @app.callback(Output('analyse_knn', 'children'),
@@ -303,15 +311,35 @@ def affichage_algo_knn(varY, varX, df, nb_splits, nb_repeats, K, t_test, standar
                 State('varY', 'value'),
                 State('varX', 'options'),
                 State('df', 'data'),
-                State('nb_variables', 'value'),
                 State('nb_splits', 'value'),
                 State('nb_repeats', 'value'),
+                State('t_test', 'value'),
+                State('standardisation', 'value'),
                 Input('submit-regmul', 'n_clicks'))
-def affichage_algo_regmul(varY, varX, df, nb_variables, nb_splits, nb_repeats, n_clicks):
+def affichage_algo_regmul(varY, varX, df, nb_splits, nb_repeats, t_test, standardisation, n_clicks):
     if(n_clicks != 0):
         df = pd.DataFrame(df)
-        algo_reg_mul = Regression(df, varX, varY)
-        return algo_reg_mul.regression_lineaire_multiple(nb_variables, nb_splits, nb_repeats)
+        algo_reg_mul = Regression(df, varX, varY, t_test)
+        return algo_reg_mul.regression_lineaire_multiple(nb_splits, nb_repeats, standardisation)
+
+# Bouton submit avec Elastic Net
+@app.callback(Output('analyse_elastinet', 'children'),
+                State('varY', 'value'),
+                State('varX', 'options'),
+                State('df', 'data'),
+                State('nb_splits', 'value'),
+                State('nb_repeats', 'value'),
+                State('t_test', 'value'),
+                State('standardisation', 'value'),
+                State('iterations', 'value'),
+                State('alpha', 'value'),      
+                State('l1_ratio', 'value'),
+                Input('submit-elastic', 'n_clicks'))
+def affichage_algo_reglog(varY, varX, df, nb_splits, nb_repeats, t_test, standardisation, iterations, alpha, l1_ratio, n_clicks):
+    if(n_clicks != 0):
+        df = pd.DataFrame(df)
+        elasticNet = Regression(df, varX, varY, t_test)
+        return elasticNet.elasticnet(l1_ratio, nb_splits, nb_repeats, iterations, alpha, standardisation)
 
 # Lancement du serveur
 if __name__ == '__main__':
