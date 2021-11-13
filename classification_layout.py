@@ -47,6 +47,12 @@ adl_layout = html.Div(children=
 # Régression logistique
 reglog_layout = html.Div(children=
     [
+        html.P('Nombre de splits :'),
+        dcc.Input(id='nb_splits', value=5, type='number', min=1, max=20, step=1),
+        html.Br(),
+        html.Br(),
+        html.P('Nombre de répétitions :'),
+        dcc.Input(id='nb_repeats', value=20, type='number', min=1, max=250, step=1),
         html.Br(),
         html.Br(),
         html.Div(html.Button("Lancer l'algorithme", id='submit-reglog', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),

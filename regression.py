@@ -76,7 +76,7 @@ class Regression():
         temps = round((end - start), 2)
 
         # ------------ D) Estimation ponctuelle -----------
-        XTrain,XTest,yTrain,yTest = train_test_split(X_ok, self.dfY, test_size= self.t_test)
+        XTrain,XTest,yTrain,yTest = train_test_split(X_ok, self.dfY, test_size= self.t_test, random_state=42)
         print(XTrain)
 
         knn.fit(XTrain, yTrain)

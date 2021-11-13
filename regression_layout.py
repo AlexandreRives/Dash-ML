@@ -28,7 +28,7 @@ regmul_layout = html.Div(children=
     ], style={'margin-left': '10px', 'margin-top': '30px'}
 )
     
-# Arbre de décision
+# ElasticNet
 arbre_layout = html.Div(children=
     [
         html.P('Nombre de splits :'),

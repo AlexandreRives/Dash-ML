@@ -85,7 +85,7 @@ class Classification():
         plot_line = px.line(scores_table, x="K_range", y="scores")
         
         # ------------ D) Estimation ponctuelle -----------
-        XTrain,XTest,yTrain,yTest = train_test_split(X_ok, self.dfY, test_size = self.t_test, random_state = 0)
+        XTrain,XTest,yTrain,yTest = train_test_split(X_ok, self.dfY, test_size = self.t_test, random_state = 42)
        
         model = arbre.fit(XTrain, yTrain)
         ypred = model.predict(XTest)
@@ -220,7 +220,7 @@ class Classification():
         plot_line = px.line(scores_table, x="K_range", y="scores")
         
         # ------------ D) Estimation ponctuelle -----------
-        XTrain,XTest,yTrain,yTest = train_test_split(X_ok, self.dfY, test_size = self.t_test, random_state = 0)
+        XTrain,XTest,yTrain,yTest = train_test_split(X_ok, self.dfY, test_size = self.t_test, random_state = 42)
         
         model = lda.fit(XTrain, yTrain)
         predLda = model.predict(XTest)
