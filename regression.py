@@ -3,22 +3,14 @@ from dash import html
 from numpy.lib.function_base import select
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split, cross_val_score, RepeatedKFold
-from sklearn.metrics import mean_squared_error, r2_score, confusion_matrix
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.tree import plot_tree
-from sklearn.tree import export_graphviz
-from sklearn.feature_selection import RFE, SelectKBest, chi2
+from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.linear_model import ElasticNet
 
-
-import matplotlib.pyplot as plt
-import dash_bootstrap_components as dbc
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import plotly.figure_factory as ff
 import time
 import plotly.graph_objects as go
 
@@ -336,7 +328,6 @@ class Regression():
         # ------------ C) Split en échantillons d'apprentissage et de test -----------
         
         XTrain, XTest, yTrain, yTest = train_test_split(X_ok, self.dfY, test_size = self.t_test, random_state = 42)
-        #print(Xtrain)
 
         #Entraînement
         RegMul.fit(XTrain, yTrain)
@@ -354,9 +345,6 @@ class Regression():
 
         #Mesure du R^2      
         perf = r2_score(yTest, y_pred)
-        
-        #Coefficients du modèle
-        coeff = RegMul.coef_ 
 
         # ------------ E) Validation croisée -----------
         cv = RepeatedKFold(n_splits= nb_splits, n_repeats= nb_repeats, random_state=0)
@@ -369,55 +357,6 @@ class Regression():
 
         plot_scatter = px.scatter(scores_table, x="yTest", y="y_pred")
 
-        # if(len(self.x_disj.columns) < nb_variables):
-
-        #     # ENTRAINEMENT #
-        #     reg_lin_mul = LinearRegression()
-        #     model = reg_lin_mul.fit(self.x_train, self.y_train)
-            
-        #     # PREDICTION #
-        #     y_pred = model.predict(self.x_test)
-
-        #     # ESTIMATEURS #
-        #     mse = mean_squared_error(self.y_test, y_pred)
-
-        #     # COEFFICIENTS #
-        #     coeff_reg_lin_mul = model.coef_
-        #     dataframeCC = pd.Series(coeff_reg_lin_mul)
-
-        # else:
-        #     # SELECTION DE VARIABLES #
-        #     selector = SelectKBest(chi2, k = nb_variables)
-        #     selector.fit_transform(self.x_train, self.y_train)
-
-        #     # ENTRAINEMENT #
-        #     reg_lin_mul = LinearRegression()
-        #     x_train_kbest = self.x_train.loc[:,selector.get_support()]
-        #     x_test_kbest = self.x_test.loc[:,selector.get_support()]
-        #     reg_lin_mul.fit(x_train_kbest, self.y_train)
-
-        #     # PREDICITON #
-        #     ypred = reg_lin_mul.predict(x_test_kbest)
-
-        #     # ESTIMATEURS #
-        #     mco = mean_squared_error(self.y_test, ypred)
-
-        #     # CONSTRUCTION DU GRAPHE #
-        #     scores_table = pd.DataFrame(data={'y_test': self.y_test, 'ypred': ypred})
-        #     plot_scatter = px.scatter(scores_table, x="y_test", y="ypred")
-
-        #     # COEFFICIENTS #
-        #     coeff_reg_lin_mul = reg_lin_mul.coef_
-        #     dataframeCC = pd.Series(coeff_reg_lin_mul)
-
-        #     # VALIDATION CROISEE + CALCUL DU TEMPS #
-        #     start = time.time()
-        #     Valid_croisee = RepeatedKFold(n_splits = nb_splits, n_repeats = nb_repeats, random_state = 0)
-        #     scores = cross_val_score(reg_lin_mul, self.x_disj, self.dfY, cv = Valid_croisee)
-        #     end = time.time()
-        #     diff_time = round((end - start), 2)
-        #     scores_moyen = round(scores.mean()*100, 2)
-
         # AFFICHAGE #
         reg_mult_layout = html.Div(children=
             [
@@ -428,6 +367,8 @@ class Regression():
                         html.H5("Présentation de l'algorithme de la regression linéaire multiple", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'})
                     ]
                 ),
+                html.Br(),
+                html.P("L'algorithme de la régression linéaire multiple vous permet de visualiser comment votre dataframe prédit vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui prédira au mieux vos individus."),
                 html.Br(),
                 html.Div(children=
                     [

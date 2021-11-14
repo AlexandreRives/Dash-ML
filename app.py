@@ -14,6 +14,10 @@ from dash import dash_table
 from classification import Classification
 from regression import Regression
 
+#############################################################
+#                            APP                            #
+#############################################################
+
 # CSS
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -151,7 +155,6 @@ def parse_contents(contents, filename, date):
                         id='varX',
                         options=
                         [
-                            #{'label': i, 'value': i} for i in df.columns
                         ],
                         value=df.columns,
                         multi=True,
@@ -266,8 +269,7 @@ def affichage_algo_adl(varY, varX, df, solv, nb_splits, nb_repeats, t_test, stan
         df = pd.DataFrame(df)
         adl = Classification(df, varX, varY, t_test)
         return adl.algo_ADL(solv, nb_splits, nb_repeats, standardisation)
-        #html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de l'analyse discriminante linéaire", style={'textAlign': 'center'})]),
-
+        
 # Bouton submit avec Reg Log
 @app.callback(Output('analyse_reglog', 'children'),
                 State('varY', 'value'),
@@ -286,8 +288,7 @@ def affichage_algo_reglog(varY, varX, df, nb_splits, nb_repeats, t_test, standar
         df = pd.DataFrame(df)
         regLog = Classification(df, varX, varY, t_test)
         return regLog.Regression_log(nb_splits, nb_repeats, standardisation, iterations, l1_ratio, C)
-        #return html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la régression logistique", style={'textAlign': 'center'})]),
-
+        
 # Bouton submit avec KNN
 @app.callback(Output('analyse_knn', 'children'),
                 State('varY', 'value'),
@@ -304,8 +305,7 @@ def affichage_algo_knn(varY, varX, df, nb_splits, nb_repeats, K, t_test, standar
         df = pd.DataFrame(df)
         knn = Regression(df, varX, varY, t_test)
         return knn.algo_knn(K, nb_splits, nb_repeats, standardisation)
-        #html.Br(),html.Div(children=[html.H5("Présentation de l'algorithme de la classification ascendante hiérarchique", style={'textAlign': 'center'})]),
-
+        
 # Bouton submit avec Reg Mul
 @app.callback(Output('analyse_regmul', 'children'),
                 State('varY', 'value'),

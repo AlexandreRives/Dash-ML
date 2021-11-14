@@ -1,11 +1,13 @@
 from dash import html
 from dash import dash_table, dcc
-from sklearn import cluster, metrics
 from sklearn.model_selection import cross_val_score, train_test_split
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-from plotly import tools
+from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import cross_val_score, RepeatedKFold, train_test_split
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
 
-import dash_bootstrap_components as dbc
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -14,12 +16,6 @@ import pandas as pd
 import time
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
-from sklearn.feature_selection import SelectKBest, chi2
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import cross_val_score, RepeatedKFold, train_test_split
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.linear_model import LogisticRegression
 
 class Classification():
 
@@ -90,8 +86,6 @@ class Classification():
         # METRIQUES #
         #Matrice de confusion
         mc = confusion_matrix(yTest, ypred, labels=model.classes_)
-        #mc = pd.crosstab(yTest,ypred)
-        #new_mc = confusion_matrix(yTest, ypred)
         tx_reconaissance = (sum(np.diag(mc)) / len(XTest)) * 100  
 
         # ------------ F) Visualisation -----------
@@ -210,16 +204,7 @@ class Classification():
         scores = cross_val_score(lda, X_ok, self.dfY, cv = Valid_croisee)
         end = time.time()
 
-        temps = round((end - start), 2)
-
-        # # PLOT DE LA VALIDATION CROISEE #
-        # K_range = []
-        # for i in range(1, (nb_repeats*nb_splits)+1):
-        #     K_range.append(i)
-        # scores_table = pd.DataFrame(data={'K_range': K_range, 'scores': scores})
-        # plot_line = px.line(scores_table, x="K_range", y="scores")
-
-        
+        temps = round((end - start), 2)        
         
         # ------------ D) Estimation ponctuelle -----------
         XTrain,XTest,yTrain,yTest = train_test_split(X_ok, self.dfY, test_size = self.t_test, random_state = 42)
@@ -234,8 +219,6 @@ class Classification():
         Aff_df = pd.DataFrame(Aff, columns=["Axe1","Axe2"]) 
         Aff_df["yPred"] = predLda
         
-
-
         # METRIQUES #
         mc = confusion_matrix(yTest, predLda, labels=model.classes_)
         tx_reconaissance = (sum(np.diag(mc)) / len(XTest)) * 100
