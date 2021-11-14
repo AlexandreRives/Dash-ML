@@ -7,6 +7,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.linear_model import ElasticNet
+from sklearn.feature_selection import RFECV
 
 import pandas as pd
 import numpy as np
@@ -325,6 +326,8 @@ class Regression():
         
         RegMul = LinearRegression()
 
+
+
         # ------------ C) Split en échantillons d'apprentissage et de test -----------
         
         XTrain, XTest, yTrain, yTest = train_test_split(X_ok, self.dfY, test_size = self.t_test, random_state = 42)
@@ -356,6 +359,14 @@ class Regression():
         temps = round((end - start), 2)
 
         plot_scatter = px.scatter(scores_table, x="yTest", y="y_pred")
+
+        # ------------ E) Sélection de variables (pas très concluante) -----------
+        estimator = RFECV(RegMul, step=1, cv=5)
+        selector = estimator.fit(XTrain, yTrain)
+        print(selector.get_support())
+        print(selector.cv_results_["mean_test_score"].mean())
+        ypred = selector.predict(XTest)
+        print(ypred)
 
         # AFFICHAGE #
         reg_mult_layout = html.Div(children=
