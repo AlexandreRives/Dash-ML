@@ -1,5 +1,6 @@
 from dash import html
 from dash import dash_table, dcc
+from numpy.core import numeric
 from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.preprocessing import StandardScaler
@@ -50,6 +51,7 @@ class Classification():
         if standardisation == 'Oui' :
             sc = StandardScaler()
             X_quant = pd.DataFrame(sc.fit_transform(self.dfX_quanti))
+            X_quant.columns = self.dfX_quanti.columns
         else : 
             X_quant = self.dfX_quanti
 
@@ -96,6 +98,9 @@ class Classification():
         label_obs = []
         for j in range(len(model.classes_)):
             label_obs.append(labels[0,j])
+
+        #Transtypage de int en string
+        label_obs = [str(numeric_string) for numeric_string in label_obs]
        
         #Création des labels prédiction
         label_pred = [label + " pred" for label in label_obs]
@@ -195,8 +200,8 @@ class Classification():
             X_ok = pd.concat([X_quant,X_qual], axis = 1)
         
         # ------------ B) Instanciation -----------
-        lda = LinearDiscriminantAnalysis(solver=solv, n_components = 2)
-        
+        #lda = LinearDiscriminantAnalysis(solver=solv, n_components = 2)
+        lda = LinearDiscriminantAnalysis(solver=solv)
         # ------------ C) Validation croisée -----------
         Valid_croisee = RepeatedKFold(n_splits = nb_splits, n_repeats = nb_repeats, random_state = 0)
 
@@ -213,11 +218,11 @@ class Classification():
         predLda = model.predict(XTest)
         
         # Structure temporaire pour affichage des coefficients
-        tmp = pd.DataFrame(lda.coef_.transpose(), columns = lda.classes_, index = X_ok.columns)
+        #tmp = pd.DataFrame(lda.coef_.transpose(), columns = lda.classes_, index = X_ok.columns)
         
-        Aff = lda.fit(XTest, yTest).transform(XTest)
-        Aff_df = pd.DataFrame(Aff, columns=["Axe1","Axe2"]) 
-        Aff_df["yPred"] = predLda
+        #Aff = lda.fit(XTest, yTest).transform(XTest)
+        #Aff_df = pd.DataFrame(Aff, columns=["Axe1","Axe2"]) 
+        #Aff_df["yPred"] = predLda
         
         # METRIQUES #
         mc = confusion_matrix(yTest, predLda, labels=model.classes_)
@@ -231,6 +236,9 @@ class Classification():
         label_obs = []
         for j in range(len(lda.classes_)):
             label_obs.append(labels[0,j])
+
+        #Transtypage de int en string
+        label_obs = [str(numeric_string) for numeric_string in label_obs]
        
         #Création des labels prédiction
         label_pred = [label + " pred" for label in label_obs]
@@ -246,7 +254,7 @@ class Classification():
                                         name='Scores'))
 
         #Visualisation ponctuelle
-        fig3 = px.scatter(Aff_df, x="Axe1", y="Axe2", color='yPred')
+        #fig3 = px.scatter(Aff_df, x="Axe1", y="Axe2", color='yPred')
 
         # AFFICHAGE DU LAYOUT #
         adl_algo_layout = html.Div(children=
@@ -265,8 +273,8 @@ class Classification():
                         html.Br(),
                         html.H5("Graphe de l'évolution du taux de reconnaissance en validation croisée", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         dcc.Graph(figure=fig2, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
-                        html.H5("Visualisation ponctuelle", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        dcc.Graph(figure=fig3, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
+                        #html.H5("Visualisation ponctuelle", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+                        #dcc.Graph(figure=fig3, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
                         html.Br(),
                         html.Div(children=
                             [
@@ -407,10 +415,13 @@ class Classification():
         label_obs = []
         for j in range(len(lr.classes_)):
             label_obs.append(labels[0,j])
-       
+        
+        #Transtypage de int en string
+        label_obs = [str(numeric_string) for numeric_string in label_obs]
+
         #Création des labels prédiction
         label_pred = [label + " pred" for label in label_obs]
-               
+        
         #Matrice de confusion
         fig = ff.create_annotated_heatmap(z = mc, 
                                         x=label_pred, 

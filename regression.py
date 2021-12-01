@@ -36,7 +36,6 @@ class Regression():
         self.dfY = df[varY]
         self.t_test = t_test
 
-
     #############################################################
     #                    K PLUS PROCHES VOISINS                 #
     #############################################################
@@ -96,31 +95,6 @@ class Regression():
 
                         html.P("L'algorithme des K plus proches voisins vous permet de visualiser comment votre dataframe prédit vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui prédira au mieux vos individus."),
 
-                        # html.H5("Tableau d'importance des variables", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        # html.Br(),
-
-                        # html.P("Nous effectuons pour vous une analyse préliminaire qui vous permet de choisir le nombre de variable à retenir. Ci-dessous le tableau de l'importance des variables : "),
-
-                        # html.Br(),
-                        #html.P("Enfin, nous vous affichons la matrice de confusion avec la métrique suivante  : le taux d'erreur."),
-                        #html.H5("Matrice de confusion", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        # html.Div(dash_table.DataTable(
-                        #     id='matrice_de_confusion',
-                        #     data=mc.to_dict('records'),
-                        #     columns=[{'name': i, 'id': i} for i in model.classes_],
-                        #     style_header={
-                        #         'backgroundColor': 'rgb(30, 30, 30)',
-                        #         'color': 'white',
-                        #     },
-                        #     style_cell={'textAlign':'center', 
-                        #                 'overflow': 'hidden',
-                        #                 'textOverflow': 'ellipsis',
-                        #                 'maxWidth': 0},
-                        #     style_data={'backgroundColor': 'rgb(50, 50, 50)',
-                        #                 'color': 'white',
-                        #                 'width': '20px'
-                        #     },
-                        # ),style={'margin':'20px'}),
                         html.Br(),
                         html.H5("Graphique de comparaison des valeurs observées et valeurs prédites", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         dcc.Graph(figure=plot_scatter, style={'width': '30%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
@@ -130,9 +104,6 @@ class Regression():
                                 html.Span("Racine de l'erreur quadratique moyenne : ", style={'fontWeight':'bold'}),
                                 html.Div(round(rmse, 2)),
                                 html.Br(),
-                                # html.Span("Taux de reconnaissance en % en validation croisée : ", style={'fontWeight':'bold'}),
-                                # html.Div(round((scores.mean()*100.0), 2)),
-                                # html.Br(),
                                 html.Span("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold'}),
                                 html.Div(temps)
                             ]
@@ -150,7 +121,6 @@ class Regression():
     # #############################################################   
 
     def elasticnet(self, l1_ratio, nb_splits, nb_repeats, iterations, alpha, standardisation):
-        #### PREPARATION DES DONNEES ####
         
        # ------------ A) Traitement du dataset ------------
         
@@ -158,6 +128,7 @@ class Regression():
         if standardisation == 'Oui' :
             sc = StandardScaler()
             X_quant = pd.DataFrame(sc.fit_transform(self.dfX_quanti))
+            X_quant.columns = self.dfX_quanti.columns
         else : 
             X_quant = self.dfX_quanti
 
@@ -199,7 +170,6 @@ class Regression():
         #Coefficients du modèle
         coeff = elc.coef_ 
 
-
         # ------------ E) Validation croisée -----------
         cv = RepeatedKFold(n_splits= nb_splits, n_repeats= nb_repeats, random_state=0)
         
@@ -209,10 +179,7 @@ class Regression():
         
         temps = round((end - start), 2)
 
-      
-        
         # ------------ F) Visualisation -----------
-        
         
         fig = go.Figure()
         fig.add_trace(go.Scatter(y=yTest,
@@ -221,14 +188,10 @@ class Regression():
         fig.add_trace(go.Scatter(y=y_pred,
                     mode='lines',
                     name='prédictions'))
-
-        #fig.show()
         
         fig2 = go.Figure(data=go.Scatter(y=scores,
                                         mode='lines+markers',
                                         name='Scores'))
-        
-        #fig2.show()
         
         elastic_net_layout = html.Div(children=
             [
@@ -326,8 +289,6 @@ class Regression():
         
         RegMul = LinearRegression()
 
-
-
         # ------------ C) Split en échantillons d'apprentissage et de test -----------
         
         XTrain, XTest, yTrain, yTest = train_test_split(X_ok, self.dfY, test_size = self.t_test, random_state = 42)
@@ -383,24 +344,6 @@ class Regression():
                 html.Br(),
                 html.Div(children=
                     [
-                        #html.P('Liste des coefficients pour les variables sélectionnées : ', style={'margin-left':'30px', 'fontWeight':'bold'}),
-                        # html.Div(dash_table.DataTable(
-                        #     id='coefficients',
-                        #     data=dataframeCC.to_dict('records'),
-                        #     columns=[{'name': i, 'id': i} for i in dataframeCC.columns],
-                        #     style_header={
-                        #         'backgroundColor': 'rgb(30, 30, 30)',
-                        #         'color': 'white',
-                        #     },
-                        #     style_cell={'textAlign':'center', 
-                        #                 'overflow': 'hidden',
-                        #                 'textOverflow': 'ellipsis',
-                        #                 'maxWidth': 0},
-                        #     style_data={'backgroundColor': 'rgb(50, 50, 50)',
-                        #                 'color': 'white',
-                        #                 'width': '20px'
-                        #     },
-                        # ),style={'margin':'20px'}),
                         html.H5("Graphique de comparaison des valeurs observées et valeurs prédites", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         dcc.Graph(figure=plot_scatter, style={'width': '30%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
                     ]

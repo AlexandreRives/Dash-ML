@@ -37,7 +37,7 @@ adl_layout = html.Div(children=
     [
         html.H6(children="Paramètres pour l'algorithme : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
         html.P("Solveur :"),
-        dcc.Dropdown(id='solv', options=[{'label' : 'svd', 'value' : 'svd'}, {'label' : 'logr', 'value' : 'logr'}, {'label' : 'eigen', 'value' : 'eigen'}], value='svd', style={'width': '300px'}),
+        dcc.Dropdown(id='solv', options=[{'label' : 'svd', 'value' : 'svd'}, {'label' : 'lsqr', 'value' : 'lsqr'}, {'label' : 'eigen', 'value' : 'eigen'}], value='svd', style={'width': '300px'}),
         html.H6(children="Paramètres validation croisée : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
         html.P('Nombre de splits :'),
         dcc.Input(id='nb_splits', value=5, type='number', min=1, max=20, step=1),

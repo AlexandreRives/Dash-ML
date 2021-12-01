@@ -66,7 +66,7 @@ knn_layout = html.Div(children=
         dcc.Input(id='nb_repeats', value=20, type='number', min=1, max=250, step=1),
         html.Br(),
         html.Br(),
-        html.P('Nombre de clusters :'),
+        html.P('Nombre de voisins :'),
         dcc.Input(id='K', value=7, type='number', min=1, max=50, step=1),
         html.Br(),
         html.Br(),
