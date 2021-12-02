@@ -135,7 +135,7 @@ def parse_contents(contents, filename, date):
 
             html.Hr(),
             html.Br(),
-            html.P("2. Choix des variables", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+            html.P("2. Choix des variables et de divers paramètres", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
             
             html.Div(children=
                 [
@@ -173,7 +173,7 @@ def parse_contents(contents, filename, date):
                         ],
                         style={'width': '300px', 'margin-left': '10px'},
                     ),
-                ]
+                ], style={'margin-left':'30px'}
             ),
             html.Br(),
 

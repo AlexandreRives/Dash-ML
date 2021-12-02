@@ -7,9 +7,10 @@ import dash_core_components as dcc
 #############################################################
 
 # Arbre de décision
-arbre_layout = html.Div(children=
+arbre_layout = html.Div(children=[html.Div(children=
     [
-        html.H6(children="Paramètres validation croisée : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
+        html.Div(children =[
+        html.H6(children="Paramètres validation croisée : ", style={'text-decoration': 'underline'}),
         html.P('Nombre de splits :'),
         dcc.Input(id='nb_splits', value=5, type='number', min=1, max=20, step=1),
         html.Br(),
@@ -18,7 +19,9 @@ arbre_layout = html.Div(children=
         dcc.Input(id='nb_repeats', value=20, type='number', min=1, max=250, step=1),
         html.Br(),
         html.Br(),
-        html.H6(children="Paramètres pour l'algorithme : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
+        ]),
+        html.Div(children=[
+        html.H6(children="Paramètres pour l'algorithme : ", style={'text-decoration': 'underline'}),
         html.P("Choisir le nombre de feuilles :"),
         dcc.Input(id='nb_feuilles', value=5, type='number', min=5, max=50, step=1),
         html.Br(),
@@ -27,31 +30,37 @@ arbre_layout = html.Div(children=
         dcc.Input(id='nb_individus', value=5, type='number', min=5, max=10000, step=1),
         html.Br(),
         html.Br(),
-        html.Div(html.Button("Lancer l'algorithme", id='submit-arbre', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),
-        html.Div(id='analyse_arbre'),
-    ], style={'margin-left': '10px', 'margin-top': '30px'}
-)
+
+        ], style = {'margin-left': '50px'}),
+
+    ], style={'margin-left': '60px', 'margin-top': '30px', 'display': 'flex', 'justify-content':'flex-start'}),  
+    html.Div(html.Button("Lancer l'algorithme", id='submit-arbre', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),
+    html.Div(id='analyse_arbre')])
 
 # Analyse discriminante linéaire
-adl_layout = html.Div(children=
+adl_layout = html.Div(children=[html.Div(children=
     [
-        html.H6(children="Paramètres pour l'algorithme : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
+        html.Div(children=[
+        html.H6(children="Paramètres pour l'algorithme : ", style={'text-decoration': 'underline'}),
         html.P("Solveur :"),
         dcc.Dropdown(id='solv', options=[{'label' : 'svd', 'value' : 'svd'}, {'label' : 'lsqr', 'value' : 'lsqr'}, {'label' : 'eigen', 'value' : 'eigen'}], value='svd', style={'width': '300px'}),
-        html.H6(children="Paramètres validation croisée : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
+        ]),
+        html.Div(children=[
+        html.H6(children="Paramètres validation croisée : ", style={'text-decoration': 'underline'}),
         html.P('Nombre de splits :'),
         dcc.Input(id='nb_splits', value=5, type='number', min=1, max=20, step=1),
         html.P('Nombre de répétitions :'),
         dcc.Input(id='nb_repeats', value=20, type='number', min=1, max=99, step=1),
-        html.Div(html.Button("Lancer l'algorithme", id='submit-adl', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),
-        html.Div(id='analyse_adl'),
-    ], style={'margin-left': '10px', 'margin-top': '30px'}
-)
+        ], style={'margin-left': '50px'}),
+    ], style={'margin-left': '60px', 'margin-top': '30px', 'display': 'flex', 'justify-content':'flex-start'}),
+    html.Div(html.Button("Lancer l'algorithme", id='submit-adl', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),
+    html.Div(id='analyse_adl')])
 
 # Régression logistique
-reglog_layout = html.Div(children=
+reglog_layout = html.Div(children=[html.Div(children=
     [
-        html.H6(children="Paramètres validation croisée : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
+        html.Div(children=[
+        html.H6(children="Paramètres validation croisée : ", style={'text-decoration': 'underline'}),
         html.P('Nombre de splits :'),
         dcc.Input(id='nb_splits', value=5, type='number', min=1, max=20, step=1),
         html.Br(),
@@ -60,7 +69,9 @@ reglog_layout = html.Div(children=
         dcc.Input(id='nb_repeats', value=20, type='number', min=1, max=250, step=1),
         html.Br(),
         html.Br(),
-        html.H6(children="Paramètres pour l'algorithme : ", style={'text-decoration': 'underline', 'margin-left': '10px'}),
+        ]),
+        html.Div(children=[
+        html.H6(children="Paramètres pour l'algorithme : ", style={'text-decoration': 'underline'}),
         html.P("Nombre d'itérations :"),
         dcc.Input(id='iterations', value=100, type='number', min=1, max=1000, step=1), 
         html.Br(),
@@ -74,9 +85,9 @@ reglog_layout = html.Div(children=
         dcc.Input(id='C', value=1, type='number', min=0, max=500, step=1),
         html.Br(),
         html.Br(),
-        html.Div(html.Button("Lancer l'algorithme", id='submit-reglog', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),
-        html.Div(id='analyse_reglog'),
-    ], style={'margin-left': '10px', 'margin-top': '30px'}
-)
+        ], style={'margin-left':'50px'}),
+    ], style={'margin-left': '60px', 'margin-top': '30px', 'display':'flex', 'justify-content':'flex-start'}),
+    html.Div(html.Button("Lancer l'algorithme", id='submit-reglog', n_clicks=0, className="buttonClick"), style={'textAlign': 'center', 'display': 'block'}),
+    html.Div(id='analyse_reglog')])
 
 
