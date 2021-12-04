@@ -27,12 +27,6 @@ class Classification():
     def __init__(self, df, varX, varY, t_test):
         self.df = df
         self.varX = varX
-        # dict_X = []
-        # for i in range(0, len(self.varX)):
-        #     dict_X.append(list(varX[i].values()))
-        # liste_X = []
-        # for i in range(0, len(dict_X)):
-        #     liste_X.append(dict_X[i][0])
         self.varY = varY
         self.dfX = df[varX]
         self.dfX_quanti = self.dfX.select_dtypes(include=[np.number])
@@ -185,6 +179,7 @@ class Classification():
             X_ok = pd.concat([X_quant,X_qual], axis = 1)
         
         # ------------ B) Instanciation -----------
+
         #lda = LinearDiscriminantAnalysis(solver=solv, n_components = 2)
         lda = LinearDiscriminantAnalysis(solver=solv)
         # ------------ C) Validation croisée -----------
@@ -201,14 +196,7 @@ class Classification():
         
         model = lda.fit(XTrain, yTrain)
         predLda = model.predict(XTest)
-        
-        # Structure temporaire pour affichage des coefficients
-        #tmp = pd.DataFrame(lda.coef_.transpose(), columns = lda.classes_, index = X_ok.columns)
-        
-        #Aff = lda.fit(XTest, yTest).transform(XTest)
-        #Aff_df = pd.DataFrame(Aff, columns=["Axe1","Axe2"]) 
-        #Aff_df["yPred"] = predLda
-        
+
         # METRIQUES #
         mc = confusion_matrix(yTest, predLda, labels=model.classes_)
         tx_reconaissance = (sum(np.diag(mc)) / len(XTest)) * 100
@@ -241,8 +229,6 @@ class Classification():
                                         mode='lines+markers',
                                         name='Scores'))
 
-        #Visualisation ponctuelle
-        #fig3 = px.scatter(Aff_df, x="Axe1", y="Axe2", color='yPred')
 
         # AFFICHAGE DU LAYOUT #
         adl_algo_layout = html.Div(children=
@@ -262,8 +248,6 @@ class Classification():
                         html.Br(),
                         html.H5("Graphe de l'évolution du taux de reconnaissance en validation croisée", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         dcc.Graph(figure=fig2, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
-                        #html.H5("Visualisation ponctuelle", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        #dcc.Graph(figure=fig3, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
                         html.Br(),
                         html.Div(children=
                             [
@@ -344,9 +328,6 @@ class Classification():
                                     multi_class = 'ovr', 
                                     C=C) 
         
-        #si la variable a moins de 2 modalités : renvoie une erreur
-        # else:
-        #     raise ValueError('La variable cible ne possède pas assez de modalités. Minimum : 2')
 
         # ------------ C) Split en échantillons d'apprentissage et de test -----------
 
@@ -369,12 +350,7 @@ class Classification():
                             y_pred, 
                             labels=lr.classes_)
         
-        #Accuracy
-        accuracy = accuracy_score(yTest, y_pred)
-        
-        #Coefficients du modèle
-        #coeff = lr.coef_ 
-        
+
         #taux de reconnaissane :
         tx_reco = (sum(np.diag(mc)) / len(XTest)) * 100
 

@@ -24,12 +24,6 @@ class Regression():
     def __init__(self, df, varX, varY, t_test):
         self.df = df
         self.varX = varX
-        # dict_X = []
-        # for i in range(0, len(self.varX)):
-        #     dict_X.append(list(varX[i].values()))
-        # liste_X = []
-        # for i in range(0, len(dict_X)):
-        #     liste_X.append(dict_X[i][0])
         self.varY = varY
         self.dfX = df[varX]
         self.dfX_quanti = self.dfX.select_dtypes(include=[np.number])
@@ -173,7 +167,6 @@ class Regression():
 
         #Tableau montrant les coefficients conservés après régularisation (coefficients != 0)
         coeff_penal = pd.DataFrame([coeff], columns = np.transpose(XTrain.columns))
-        #coeff_penal = coeff_penal.loc[:, (coeff_penal != 0).all(axis=0)]
         
         #On transpose pour passer en colonnes
         coeff_penal = coeff_penal.T.rename(columns = {0 : "Coefficients"})

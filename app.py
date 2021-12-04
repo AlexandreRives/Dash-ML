@@ -351,4 +351,4 @@ def affichage_algo_reglog(varY, varX, df, nb_splits, nb_repeats, t_test, standar
 
 # Lancement du serveur
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
