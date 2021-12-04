@@ -27,14 +27,14 @@ class Classification():
     def __init__(self, df, varX, varY, t_test):
         self.df = df
         self.varX = varX
-        dict_X = []
-        for i in range(0, len(self.varX)):
-            dict_X.append(list(varX[i].values()))
-        liste_X = []
-        for i in range(0, len(dict_X)):
-            liste_X.append(dict_X[i][0])
+        # dict_X = []
+        # for i in range(0, len(self.varX)):
+        #     dict_X.append(list(varX[i].values()))
+        # liste_X = []
+        # for i in range(0, len(dict_X)):
+        #     liste_X.append(dict_X[i][0])
         self.varY = varY
-        self.dfX = df[liste_X]
+        self.dfX = df[varX]
         self.dfX_quanti = self.dfX.select_dtypes(include=[np.number])
         self.dfX_quali = self.dfX.select_dtypes(exclude=[np.number])
         self.dfY = df[varY]
@@ -82,8 +82,8 @@ class Classification():
         ypred = model.predict(XTest)
 
         # IMPORTANCE DE VARIABLES #
-        importance_var = {"Variables":X_ok.columns, "Importance des variables":arbre.feature_importances_}
-        importance_var = pd.DataFrame(importance_var).sort_values(by="Importance des variables", ascending=False)
+        importance_var = {"Variables":X_ok.columns, "Coefficients":arbre.feature_importances_}
+        importance_var = pd.DataFrame(importance_var).sort_values(by="Coefficients", ascending=False)
 
         # METRIQUES #
         #Matrice de confusion
@@ -108,12 +108,17 @@ class Classification():
         #Matrice de confusion
         fig = ff.create_annotated_heatmap(z = mc, 
                                         x=label_pred, 
-                                        y=label_obs) 
+                                        y=label_obs, colorscale='blues') 
 
         #Estimateurs de la validation croisée
         fig2 = go.Figure(data=go.Scatter(y=scores,
                                         mode='lines+markers',
                                         name='Scores'))
+
+        #Bar graphe montrant les coefficients du modèle selon la pénalité choisie
+        fig3 = go.Figure(data=[go.Bar(x=importance_var['Variables'], y=importance_var['Coefficients'])])
+        fig3.update_layout(barmode='stack',
+                        xaxis={'categoryorder':'total descending'})
 
         # AFFICHAGE DU LAYOUT #
         arbre_algo_layout = html.Div(children=
@@ -125,48 +130,28 @@ class Classification():
                         html.H4("Présentation de l'algorithme de l'arbre de décision", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         html.Br(),
 
-                        html.P("L'algorithme de l'arbre de décision vous permet de visualiser comment votre dataframe classe vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui classifiera au mieux vos individus."),
+                        html.P("L'algorithme de l'arbre de décision vous permet de visualiser comment votre dataframe classe vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui classifiera au mieux vos individus.", style = {'textAlign':'center'}),
 
                         html.H5("Tableau d'importance des variables", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         html.Br(),
 
-                        html.P("Nous effectuons pour vous une analyse préliminaire qui vous permet de choisir le nombre de variable à retenir. Ci-dessous le tableau de l'importance des variables : "),
+                        html.P("Nous effectuons pour vous une analyse préliminaire qui vous permet de choisir le nombre de variable à retenir. Ci-dessous le tableau de l'importance des variables : ", style = {'textAlign':'center'}),
 
-                        html.Div(dash_table.DataTable(
-                            id='importance',
-                            data=importance_var.to_dict('records'),
-                            columns=[{'name': i, 'id': i} for i in importance_var.columns],
-                            style_header={
-                                'backgroundColor': 'rgb(30, 30, 30)',
-                                'color': 'white',
-                            },
-                            style_cell={'textAlign':'center', 
-                                        'overflow': 'hidden',
-                                        'textOverflow': 'ellipsis',
-                                        'maxWidth': 0},
-                            style_data={'backgroundColor': 'rgb(50, 50, 50)',
-                                        'color': 'white',
-                                        'width': '20px'
-                            },
-                        ),style={'margin-right':'200px', 'margin-left':'200px'}),
-                        html.Br(),
-                        html.P("Enfin, nous vous affichons la matrice de confusion avec la métrique suivante  : le taux d'erreur."),
+                        dcc.Graph(figure = fig3, style={'width': '40%', 'margin-left':'auto', 'margin-right':'auto', 'margin-top':'auto'}),
                         html.H5("Matrice de confusion", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        dcc.Graph(figure = fig, style={'width': '50%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
-                        
+                        dcc.Graph(figure = fig, style={'width': '40%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
+                        html.P("Taux de reconnaissance en % en estimation ponctuelle : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                        html.Div(round(tx_reconaissance, 2), style = {'textAlign':'center'}),
+                        html.Br(),
                         html.H5("Graphe de l'évolution du taux de reconnaissance en validation croisée", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         dcc.Graph(figure=fig2, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
                         html.Div(children=
                             [
-
-                                html.Span("Taux de reconaissance en % sur le dataset en estimation ponctuelle : ", style={'fontWeight':'bold'}),
-                                html.Div(round(tx_reconaissance, 2)),
+                                html.P("Taux de reconnaissance en % en validation croisée : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(round((scores.mean()*100.0), 2), style = {'textAlign':'center'}),
                                 html.Br(),
-                                html.Span("Taux de reconaissance en % en validation croisée : ", style={'fontWeight':'bold'}),
-                                html.Div(round((scores.mean()*100.0), 2)),
-                                html.Br(),
-                                html.Span("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold'}),
-                                html.Div(temps)
+                                html.P("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(temps, style = {'textAlign':'center'})
                             ]
                         )
 
@@ -178,7 +163,7 @@ class Classification():
         return arbre_algo_layout
 
     #############################################################
-    #            ANALYSE DISCRIMINANTE LINEAIRE                 #
+    #              ANALYSE DISCRIMINANTE LINEAIRE               #
     #############################################################
     
     def algo_ADL(self, solv, nb_splits, nb_repeats, standardisation):
@@ -242,11 +227,14 @@ class Classification():
        
         #Création des labels prédiction
         label_pred = [label + " pred" for label in label_obs]
+
+        newlist = [x for x in scores if np.isnan(x) == False]
+        print(np.mean(newlist))
                
         #Matrice de confusion
         fig = ff.create_annotated_heatmap(z = mc, 
                                         x=label_pred, 
-                                        y=label_obs) 
+                                        y=label_obs, colorscale='blues') 
 
         #Estimateurs de la validation croisée
         fig2 = go.Figure(data=go.Scatter(y=scores,
@@ -265,11 +253,12 @@ class Classification():
                     [
                         html.H4("Présentation de l'algorithme de l'analyse discriminante linéaire", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         html.Br(),
-                        html.P("L'algorithme de l'analyse discriminante linéaire vous permet de visualiser comment votre dataframe classe vos différents individus. Vous pourrez grâce à la sélection de feuilles et du nombre maximum d'individus par feuille relancer l'algorithme qui classifiera au mieux vos individus."),
+                        html.P("L'algorithme de l'analyse discriminante linéaire vous permet de visualiser comment votre dataframe classe vos différents individus. Vous pourrez grâce à la sélection de feuilles et du nombre maximum d'individus par feuille relancer l'algorithme qui classifiera au mieux vos individus.", style = {'textAlign':'center'}),
                         html.Br(),
-                        html.P("Enfin, nous vous affichons la matrice de confusion avec la métrique suivante  : le taux d'erreur."),
                         html.H5("Matrice de confusion", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        dcc.Graph(figure=fig, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
+                        dcc.Graph(figure=fig, style={'width': '40%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
+                        html.P("Taux de reconnaissance en % en estimation ponctuelle : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                        html.Div(round(tx_reconaissance, 2), style = {'textAlign':'center'}),
                         html.Br(),
                         html.H5("Graphe de l'évolution du taux de reconnaissance en validation croisée", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         dcc.Graph(figure=fig2, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
@@ -278,14 +267,12 @@ class Classification():
                         html.Br(),
                         html.Div(children=
                             [
-                                html.Span("Taux de reconaissance en % sur le dataset en estimation ponctuelle : ", style={'fontWeight':'bold'}),
-                                html.Div(round(tx_reconaissance, 2)),
+
+                                html.P("Taux de reconaissance en % en validation croisée : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(round(np.mean(newlist), 2), style={'textAlign': 'center'}),
                                 html.Br(),
-                                html.Span("Taux de reconaissance en % en validation croisée : ", style={'fontWeight':'bold'}),
-                                html.Div(round((scores.mean()*100.0), 2)),
-                                html.Br(),
-                                html.Span("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold'}),
-                                html.Div(temps)
+                                html.P("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(temps, style = {'textAlign':'center'})
                             ]
                         )
 
@@ -425,7 +412,7 @@ class Classification():
         #Matrice de confusion
         fig = ff.create_annotated_heatmap(z = mc, 
                                         x=label_pred, 
-                                        y=label_obs) 
+                                        y=label_obs, colorscale='blues') 
 
         #Estimateurs de la validation croisée
         fig2 = go.Figure(data=go.Scatter(y=scores,
@@ -440,28 +427,23 @@ class Classification():
                     [
                         html.H4("Présentation de l'algorithme de la régression logistique", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         html.Br(),
-                        html.P("L'algorithme de régression logistique vous permet de visualiser comment le modèle classe vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui prédira au mieux vos individus."),
+                        html.P("L'algorithme de régression logistique vous permet de visualiser comment le modèle classe vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui prédira au mieux vos individus.", style = {'textAlign':'center'}),
                         html.Br(),
-                        html.P("Enfin, nous vous affichons la matrice de confusion avec la métrique suivante  : le taux de reconnaissance."),
                         html.H5("Matrice de confusion", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        dcc.Graph(figure = fig, style={'width': '50%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
+                        dcc.Graph(figure = fig, style={'width': '40%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
+                        html.P("Taux de reconnaissance en estimation ponctuelle : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                        html.Div(round(tx_reco, 2), style = {'textAlign':'center'}),
                         html.Br(),
                         html.H5("Evolution des estimateurs de la validation croisée", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         dcc.Graph(figure = fig2, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
                         html.Br(),
                         html.Div(children=
                             [
-                                html.Span("Taux de reconaissance en % en validation croisée : ", style={'fontWeight':'bold'}),
-                                html.Div(round((scores.mean()*100.0), 2)),
-                                html.Span("Taux de reconnaissance en estimation ponctuelle : ", style={'fontWeight':'bold'}),
-                                html.Div(round(tx_reco, 2)),
+                                html.P("Taux de reconnaissance en % en validation croisée : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(round((scores.mean()*100.0), 2), style = {'textAlign':'center'}),
                                 html.Br(),
-                                # html.Span("Coefficients du modèle : ", style={'fontWeight':'bold'}),
-                                # html.Div(coeff),
-                                html.Br(),
-                                html.Span("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold'}),
-                                html.Div(temps),
-
+                                html.P("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(temps, style = {'textAlign':'center'}),
                             ]
                         )
 

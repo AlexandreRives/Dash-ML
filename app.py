@@ -163,6 +163,8 @@ def parse_contents(contents, filename, date):
                     html.Br(),
                     html.H6("Taille de l'échantillon test :", style={'text-decoration': 'underline', 'margin-left':'10px'}),
                     dcc.Input(id='t_test', value=0.3, type='number', min=0.05, max=1, step=0.05, style={'margin-left': '20px'}),
+                    html.Br(),
+                    html.Br(),
                     html.H6(children="Voulez-vous centrer et réduire ?", style={'text-decoration': 'underline', 'margin-left': '10px'}),
                     dcc.Dropdown(
                         id='standardisation',
@@ -238,7 +240,7 @@ def render_algo(onglets):
 # Bouton submit analyse avec Arbre des décision
 @app.callback(Output('analyse_arbre', 'children'),
                 State('varY', 'value'),
-                State('varX', 'options'),
+                State('varX', 'value'),
                 State('df', 'data'),
                 State('nb_feuilles', 'value'),
                 State('nb_individus', 'value'),
@@ -249,6 +251,7 @@ def render_algo(onglets):
                 Input('submit-arbre', 'n_clicks'))
 def affichage_algo_arbre(varY, varX, df, nb_feuilles, nb_individus, nb_splits, nb_repeats, t_test, standardisation, n_clicks):
     if(n_clicks != 0):
+        varX = [x for x in varX if x not in varY]
         df = pd.DataFrame(df)
         arbre = Classification(df, varX, varY, t_test)
         return arbre.algo_arbre(nb_feuilles, nb_individus, nb_splits, nb_repeats, standardisation)
@@ -256,7 +259,7 @@ def affichage_algo_arbre(varY, varX, df, nb_feuilles, nb_individus, nb_splits, n
 # Bouton submit avec ADL
 @app.callback(Output('analyse_adl', 'children'),
                 State('varY', 'value'),
-                State('varX', 'options'),
+                State('varX', 'value'),
                 State('df', 'data'),
                 State('solv', 'value'),
                 State('nb_splits', 'value'),
@@ -266,6 +269,7 @@ def affichage_algo_arbre(varY, varX, df, nb_feuilles, nb_individus, nb_splits, n
                 Input('submit-adl', 'n_clicks'))
 def affichage_algo_adl(varY, varX, df, solv, nb_splits, nb_repeats, t_test, standardisation, n_clicks):
     if(n_clicks != 0):
+        varX = [x for x in varX if x not in varY]
         df = pd.DataFrame(df)
         adl = Classification(df, varX, varY, t_test)
         return adl.algo_ADL(solv, nb_splits, nb_repeats, standardisation)
@@ -273,7 +277,7 @@ def affichage_algo_adl(varY, varX, df, solv, nb_splits, nb_repeats, t_test, stan
 # Bouton submit avec Reg Log
 @app.callback(Output('analyse_reglog', 'children'),
                 State('varY', 'value'),
-                State('varX', 'options'),
+                State('varX', 'value'),
                 State('df', 'data'),
                 State('nb_splits', 'value'),
                 State('nb_repeats', 'value'),
@@ -285,6 +289,7 @@ def affichage_algo_adl(varY, varX, df, solv, nb_splits, nb_repeats, t_test, stan
                 Input('submit-reglog', 'n_clicks'))
 def affichage_algo_reglog(varY, varX, df, nb_splits, nb_repeats, t_test, standardisation, iterations, l1_ratio, C, n_clicks):
     if(n_clicks != 0):
+        varX = [x for x in varX if x not in varY]
         df = pd.DataFrame(df)
         regLog = Classification(df, varX, varY, t_test)
         return regLog.Regression_log(nb_splits, nb_repeats, standardisation, iterations, l1_ratio, C)
@@ -292,7 +297,7 @@ def affichage_algo_reglog(varY, varX, df, nb_splits, nb_repeats, t_test, standar
 # Bouton submit avec KNN
 @app.callback(Output('analyse_knn', 'children'),
                 State('varY', 'value'),
-                State('varX', 'options'),
+                State('varX', 'value'),
                 State('df', 'data'),
                 State('nb_splits', 'value'),
                 State('nb_repeats', 'value'),
@@ -302,6 +307,7 @@ def affichage_algo_reglog(varY, varX, df, nb_splits, nb_repeats, t_test, standar
                 Input('submit-knn', 'n_clicks'))
 def affichage_algo_knn(varY, varX, df, nb_splits, nb_repeats, K, t_test, standardisation, n_clicks):
     if(n_clicks != 0):
+        varX = [x for x in varX if x not in varY]
         df = pd.DataFrame(df)
         knn = Regression(df, varX, varY, t_test)
         return knn.algo_knn(K, nb_splits, nb_repeats, standardisation)
@@ -309,7 +315,7 @@ def affichage_algo_knn(varY, varX, df, nb_splits, nb_repeats, K, t_test, standar
 # Bouton submit avec Reg Mul
 @app.callback(Output('analyse_regmul', 'children'),
                 State('varY', 'value'),
-                State('varX', 'options'),
+                State('varX', 'value'),
                 State('df', 'data'),
                 State('nb_splits', 'value'),
                 State('nb_repeats', 'value'),
@@ -318,6 +324,7 @@ def affichage_algo_knn(varY, varX, df, nb_splits, nb_repeats, K, t_test, standar
                 Input('submit-regmul', 'n_clicks'))
 def affichage_algo_regmul(varY, varX, df, nb_splits, nb_repeats, t_test, standardisation, n_clicks):
     if(n_clicks != 0):
+        varX = [x for x in varX if x not in varY]
         df = pd.DataFrame(df)
         algo_reg_mul = Regression(df, varX, varY, t_test)
         return algo_reg_mul.regression_lineaire_multiple(nb_splits, nb_repeats, standardisation)
@@ -325,7 +332,7 @@ def affichage_algo_regmul(varY, varX, df, nb_splits, nb_repeats, t_test, standar
 # Bouton submit avec Elastic Net
 @app.callback(Output('analyse_elastinet', 'children'),
                 State('varY', 'value'),
-                State('varX', 'options'),
+                State('varX', 'value'),
                 State('df', 'data'),
                 State('nb_splits', 'value'),
                 State('nb_repeats', 'value'),
@@ -337,6 +344,7 @@ def affichage_algo_regmul(varY, varX, df, nb_splits, nb_repeats, t_test, standar
                 Input('submit-elastic', 'n_clicks'))
 def affichage_algo_reglog(varY, varX, df, nb_splits, nb_repeats, t_test, standardisation, iterations, alpha, l1_ratio, n_clicks):
     if(n_clicks != 0):
+        varX = [x for x in varX if x not in varY]
         df = pd.DataFrame(df)
         elasticNet = Regression(df, varX, varY, t_test)
         return elasticNet.elasticnet(l1_ratio, nb_splits, nb_repeats, iterations, alpha, standardisation)

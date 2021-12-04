@@ -24,14 +24,14 @@ class Regression():
     def __init__(self, df, varX, varY, t_test):
         self.df = df
         self.varX = varX
-        dict_X = []
-        for i in range(0, len(self.varX)):
-            dict_X.append(list(varX[i].values()))
-        liste_X = []
-        for i in range(0, len(dict_X)):
-            liste_X.append(dict_X[i][0])
+        # dict_X = []
+        # for i in range(0, len(self.varX)):
+        #     dict_X.append(list(varX[i].values()))
+        # liste_X = []
+        # for i in range(0, len(dict_X)):
+        #     liste_X.append(dict_X[i][0])
         self.varY = varY
-        self.dfX = df[liste_X]
+        self.dfX = df[varX]
         self.dfX_quanti = self.dfX.select_dtypes(include=[np.number])
         self.dfX_quali = self.dfX.select_dtypes(exclude=[np.number])
         self.dfY = df[varY]
@@ -94,7 +94,7 @@ class Regression():
                         html.H4("Présentation de l'algorithme des K plus proches voisins", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         html.Br(),
 
-                        html.P("L'algorithme des K plus proches voisins vous permet de visualiser comment votre dataframe prédit vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui prédira au mieux vos individus."),
+                        html.P("L'algorithme des K plus proches voisins vous permet de visualiser comment votre dataframe prédit vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui prédira au mieux vos individus.", style = {'textAlign':'center'}),
 
                         html.Br(),
                         html.H5("Graphique de comparaison des valeurs observées et valeurs prédites", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
@@ -102,11 +102,11 @@ class Regression():
                         html.Br(),
                         html.Div(children=
                             [
-                                html.Span("Racine de l'erreur quadratique moyenne : ", style={'fontWeight':'bold'}),
-                                html.Div(round(rmse, 2)),
+                                html.P("Racine de l'erreur quadratique moyenne : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(round(rmse, 2), style = {'textAlign':'center'}),
                                 html.Br(),
-                                html.Span("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold'}),
-                                html.Div(temps)
+                                html.P("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(temps, style = {'textAlign':'center'})
                             ]
                         )
 
@@ -206,14 +206,11 @@ class Regression():
                                         mode='lines+markers',
                                         name='Scores'))
         
-        #Bar graphes montrant les coefficients du modèle selon la pénalité choisie
-
+        #Bar graphe montrant les coefficients du modèle selon la pénalité choisie
         fig3 = go.Figure(data=[go.Bar(x=coeff_penal['Variables'], y=coeff_penal['Coefficients'])])
         fig3.update_layout(barmode='stack',
-                        xaxis={'categoryorder':'total descending'},
-                        title_text='Paramètres du modèle')
+                        xaxis={'categoryorder':'total descending'})
 
-        
         elastic_net_layout = html.Div(children=
             [
                 html.Hr(),
@@ -321,10 +318,7 @@ class Regression():
         # ------------ E) Sélection de variables (pas très concluante) -----------
         estimator = RFECV(RegMul, step=1, cv=5)
         selector = estimator.fit(XTrain, yTrain)
-        print(selector.get_support())
-        print(selector.cv_results_["mean_test_score"].mean())
         ypred = selector.predict(XTest)
-        print(ypred)
 
         # AFFICHAGE #
         reg_mult_layout = html.Div(children=
@@ -337,7 +331,7 @@ class Regression():
                     ]
                 ),
                 html.Br(),
-                html.P("L'algorithme de la régression linéaire multiple vous permet de visualiser comment votre dataframe prédit vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui prédira au mieux vos individus."),
+                html.P("L'algorithme de la régression linéaire multiple vous permet de visualiser comment votre dataframe prédit vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui prédira au mieux vos individus.", style = {'textAlign':'center'}),
                 html.Br(),
                 html.Div(children=
                     [
@@ -347,14 +341,14 @@ class Regression():
                 ),
                 html.Div(children=
                             [
-                                html.Span("Racine de l'erreur quadratique moyenne : ", style={'fontWeight':'bold'}),
-                                html.Div(round(RMSE, 2)),
+                                html.P("Racine de l'erreur quadratique moyenne : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(round(RMSE, 2), style = {'textAlign':'center'}),
                                 html.Br(),
-                                html.Span("Coefficient de détermination R² : ", style={'fontWeight':'bold'}),
-                                html.Div(round(perf, 2)),
+                                html.P("Coefficient de détermination R² : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(round(perf, 2), style = {'textAlign':'center'}),
                                 html.Br(),
-                                html.Span("Temps d'execution de l'algorithme en validation croisée en seconde : ", style={'fontWeight':'bold'}),
-                                html.Div(temps)
+                                html.P("Temps d'execution de l'algorithme en validation croisée en seconde : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(temps, style = {'textAlign':'center'})
                             ]
                 )
             ]
