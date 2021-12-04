@@ -50,7 +50,7 @@ elasticnet_layout = html.Div(children=[html.Div(children=
         html.Br(),
         html.Br(),
         html.P("L1 ratio - curseur de répartition des pénalités Ridge et Lasso : "),
-        html.P("0 = Lasso, 1 = Ridge. Entre les 2, combinaisons des 2."),
+        html.P("1 = Lasso, 0 = Ridge. Entre les 2, combinaisons des 2."),
         dcc.Input(id='l1_ratio', value=0.5, type='number', min=0, max=1, step=0.05),
         html.Br(),
         html.Br(),

@@ -14,6 +14,7 @@ import numpy as np
 import plotly.express as px
 import time
 import plotly.graph_objects as go
+import plotly.figure_factory as ff
 
 class Regression():
     #############################################################
@@ -147,7 +148,7 @@ class Regression():
         
         # ------------ C) Split en échantillons d'apprentissage et de test -----------
         
-        XTrain, XTest, yTrain, yTest = train_test_split(X_ok, self.dfY, test_size = self.t_test, random_state = 42)
+        XTrain, XTest, yTrain, yTest = train_test_split(X_ok,self.dfY, test_size = self.t_test, random_state = 42)
         #print(Xtrain)
 
         #Entraînement
@@ -168,9 +169,20 @@ class Regression():
         perf = r2_score(yTest, y_pred)
         
         #Coefficients du modèle
-        coeff = elc.coef_ 
+        coeff = np.round(elc.coef_,4)
 
+        #Tableau montrant les coefficients conservés après régularisation (coefficients != 0)
+        coeff_penal = pd.DataFrame([coeff], columns = np.transpose(XTrain.columns))
+        #coeff_penal = coeff_penal.loc[:, (coeff_penal != 0).all(axis=0)]
+        
+        #On transpose pour passer en colonnes
+        coeff_penal = coeff_penal.T.rename(columns = {0 : "Coefficients"})
+        
+        #On crée la colonne Variables
+        coeff_penal["Variables"] = XTrain.columns
+        
         # ------------ E) Validation croisée -----------
+        
         cv = RepeatedKFold(n_splits= nb_splits, n_repeats= nb_repeats, random_state=0)
         
         start = time.time()
@@ -180,7 +192,7 @@ class Regression():
         temps = round((end - start), 2)
 
         # ------------ F) Visualisation -----------
-        
+        #Graphe montrant y observés points et modèle entraîné
         fig = go.Figure()
         fig.add_trace(go.Scatter(y=yTest,
                     mode='markers',
@@ -189,9 +201,18 @@ class Regression():
                     mode='lines',
                     name='prédictions'))
         
+        #Graphe montrant l'évolution de l'estimateur des k validations croisées
         fig2 = go.Figure(data=go.Scatter(y=scores,
                                         mode='lines+markers',
                                         name='Scores'))
+        
+        #Bar graphes montrant les coefficients du modèle selon la pénalité choisie
+
+        fig3 = go.Figure(data=[go.Bar(x=coeff_penal['Variables'], y=coeff_penal['Coefficients'])])
+        fig3.update_layout(barmode='stack',
+                        xaxis={'categoryorder':'total descending'},
+                        title_text='Paramètres du modèle')
+
         
         elastic_net_layout = html.Div(children=
             [
@@ -201,54 +222,30 @@ class Regression():
                     [
                         html.H4("Présentation de l'algorithme de la régression ElasticNet", style={'textAlign': 'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         html.Br(),
-                        html.P("L'algorithme de régression ElasticNet vous permet de visualiser comment le modèle prédit vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui prédira au mieux vos individus."),
-                        html.Br(),
-                        html.P("Le paramètre l1 ratio, compris entre 0 et 1 vous permet d'orienter la pénalité vers Ridge, Lasso ou entre les deux"),
-                        html.P("Le paramètre alpha est "),
-                        # html.H5("Tableau d'importance des variables", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        # html.Br(),
-
-                        # html.P("Nous effectuons pour vous une analyse préliminaire qui vous permet de choisir le nombre de variable à retenir. Ci-dessous le tableau de l'importance des variables : "),
-
-                        # html.Br(),
-                        #html.P("Enfin, nous vous affichons la matrice de confusion avec la métrique suivante  : le taux d'erreur."),
-                        #html.H5("Matrice de confusion", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
-                        # html.Div(dash_table.DataTable(
-                        #     id='matrice_de_confusion',
-                        #     data=mc.to_dict('records'),
-                        #     columns=[{'name': i, 'id': i} for i in model.classes_],
-                        #     style_header={
-                        #         'backgroundColor': 'rgb(30, 30, 30)',
-                        #         'color': 'white',
-                        #     },
-                        #     style_cell={'textAlign':'center', 
-                        #                 'overflow': 'hidden',
-                        #                 'textOverflow': 'ellipsis',
-                        #                 'maxWidth': 0},
-                        #     style_data={'backgroundColor': 'rgb(50, 50, 50)',
-                        #                 'color': 'white',
-                        #                 'width': '20px'
-                        #     },
-                        # ),style={'margin':'20px'}),
+                        html.P("L'algorithme de régression ElasticNet vous permet de visualiser comment le modèle prédit vos différents individus. Vous pourrez grâce aux différents paramètres relancer l'algorithme qui prédira au mieux vos individus.", style={'textAlign': 'center'}),
+                        html.P("Le paramètre l1 ratio, compris entre 0 et 1 vous permet d'orienter la pénalité vers Ridge, Lasso ou entre les deux", style={'textAlign': 'center'}),
+                        html.P("Le paramètre alpha est un multiplicateur de la pénalité.", style={'textAlign': 'center'}),
                         html.Br(),
                         html.H5("Graphique de comparaison des valeurs observées et valeurs prédites", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         dcc.Graph(figure=fig, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
                         html.Br(),
                         html.H5("Evolution des estimateurs de la validation croisée", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
                         dcc.Graph(figure = fig2, style={'width': '70%', 'display':'block', 'margin-left':'auto', 'margin-right':'auto'}),
+                        html.H5("Paramètres du modèle", style={'textAlign':'center', 'text-shadow':'-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 1px 1px 10px #141414', 'color':'#333'}),
+                        html.Br(),
+                        html.P("Le graphe ci-dessous présente les paramètres du modèle. Les variables sont sélectionnées selon les hyperparamètres l1_ratio et alpha", style={'fontWeight':'bold','textAlign':'center'}),
+                        dcc.Graph(figure = fig3, style={'width': '70%', 'margin-left':'auto', 'margin-right':'auto'}),
                         html.Br(),
                         html.Div(children=
                             [
-                                html.Span("Racine de l'erreur quadratique moyenne : ", style={'fontWeight':'bold'}),
-                                html.Div(round(RMSE, 2)),
+                                html.P("Racine de l'erreur quadratique moyenne : " , style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(round(RMSE, 2), style={'textAlign':'center'}),
                                 html.Br(),
-                                html.Span("Coefficient de détermination R² : ", style={'fontWeight':'bold'}),
-                                html.Div(round(perf, 2)),
+                                html.P("Coefficient de détermination R² : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(round(perf, 2), style={'textAlign':'center'}),
                                 html.Br(),
-                                # html.Span("Coefficients du modèles : ", style={'fontWeight':'bold'}),
-                                # html.Div(round(coeff, 2)),
-                                html.Span("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold'}),
-                                html.Div(temps)
+                                html.P("Temps d'exécution de l'algorithme en validation croisée en secondes : ", style={'fontWeight':'bold', 'textAlign':'center'}),
+                                html.Div(temps, style={'textAlign':'center'})
                             ]
                         )
 
