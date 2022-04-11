@@ -38,5 +38,6 @@ Voici un exemple avec le jeu de données iris.csv :
   * K plus proches voisins
   * ElasticNet
   * Régression linéaire multiple
+
 Chacun de ces algorithmes possède des paramètres spécifiques que l’utilisateur peut faire varier à sa guise.
 
