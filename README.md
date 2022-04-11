@@ -13,7 +13,11 @@ L’objectif de notre application est qu’un utilisateur (sans réelles connais
 1. Télécharger le dossier .zip à partir du dépôt github
 2. Vérifier que toutes les librairies utilisées sont correctement installées :
 base64, io, dash, pandas, numpy, cchardet, sklearn, plotly, os, time, dash bootstrap components, dash html components, dash core components
-3. Dans un terminal, exécuter le fichier "app.py" à l’aide de la commande (dans le dossier du projet) : '''python app.py'''
+3. Dans un terminal, se déplacer dans le dossier du projet et exécuter le fichier "app.py" à l’aide des commandes : 
+```
+cd _chemin_
+python app.py
+```
 Vous devez obtenir l’interface suivante :
 ![img1](https://user-images.githubusercontent.com/65174929/162714200-4629e65e-c33f-45a2-8ef9-6fbe1e055ba9.png)
 
