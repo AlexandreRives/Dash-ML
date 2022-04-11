@@ -31,12 +31,12 @@ Voici un exemple avec le jeu de données iris.csv :
 
 5. Choix de l’algorithme à utiliser :
 * En rouge, il s’agit des algorithmes de classification, à utiliser lorsque la variable cible est catégorielle :
-– Arbre de décision
-– Analyse discriminante linéaire
-– Régression logistique
+  * Arbre de décision
+  * Analyse discriminante linéaire
+  * Régression logistique
 * En bleu, il s’agit des algorithmes de régression, à utiliser lorsque la variable cible est quantitative :
-– K plus proches voisins
-– ElasticNet
-– Régression linéaire multiple
+  * K plus proches voisins
+  * ElasticNet
+  * Régression linéaire multiple
 Chacun de ces algorithmes possède des paramètres spécifiques que l’utilisateur peut faire varier à sa guise.
 
