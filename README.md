@@ -41,3 +41,12 @@ Voici un exemple avec le jeu de données iris.csv :
 
 Chacun de ces algorithmes possède des paramètres spécifiques que l’utilisateur peut faire varier à sa guise.
 
+6. En fonction de l’algorithme choisi, les paramètres ne sont pas les mêmes. Cependant, leurs résultats restent comparables entre eux. L’utilisateur peut alors jouer avec les paramètres pour trouver la meilleure combinaison possible. 
+
+Par exemple, l’algorithme de classification "arbre de décision" ressemble à cela :
+![img3](https://user-images.githubusercontent.com/65174929/162715836-9501bd31-c2b4-4146-859c-c51d0ee35cea.png)
+![img4](https://user-images.githubusercontent.com/65174929/162715861-e171479e-61c0-4403-8467-d676331a3f95.png)
+
+
+
+
