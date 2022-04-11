@@ -30,11 +30,11 @@ Voici un exemple avec le jeu de données iris.csv :
 ![img2](https://user-images.githubusercontent.com/65174929/162714982-03957859-8ecf-43a3-8917-bd55dcf88c0a.png)
 
 5. Choix de l’algorithme à utiliser :
-* En rouge, il s’agit des algorithmes de classification, à utiliser lorsque la variable cible est catégorielle :
+* En rouge, il s’agit des __algorithmes de classification__, à utiliser lorsque la __variable cible est catégorielle__ :
   * Arbre de décision
   * Analyse discriminante linéaire
   * Régression logistique
-* En bleu, il s’agit des algorithmes de régression, à utiliser lorsque la variable cible est quantitative :
+* En bleu, il s’agit des __algorithmes de régression__, à utiliser lorsque la __variable cible est quantitative__ :
   * K plus proches voisins
   * ElasticNet
   * Régression linéaire multiple
@@ -46,7 +46,5 @@ Chacun de ces algorithmes possède des paramètres spécifiques que l’utilisat
 Par exemple, l’algorithme de classification "arbre de décision" ressemble à cela :
 ![img3](https://user-images.githubusercontent.com/65174929/162715836-9501bd31-c2b4-4146-859c-c51d0ee35cea.png)
 ![img4](https://user-images.githubusercontent.com/65174929/162715861-e171479e-61c0-4403-8467-d676331a3f95.png)
-
-
 
 
